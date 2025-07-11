@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Table,
   Card,
@@ -6,94 +6,50 @@ import {
   Button,
   Space,
   Typography,
-  message,
-  Popconfirm,
   Modal,
   Form,
+  Dropdown,
 } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  SettingOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
-import api from "../../api/axios";
+import { useCrud } from "../../hooks/useCrud";
 
 const { Title } = Typography;
 
 const Departments = () => {
-  const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingDepartment, setEditingDepartment] = useState(null);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState("");
+  const {
+    form,
+    createMutation,
+    updateMutation,
+    modalOpen,
+    editingData,
+    useFetch,
+    setModalOpen,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    refreshData,
+    handleSubmit,
+  } = useCrud("/departments");
 
-  const fetchDepartments = async () => {
-    setLoading(true);
-    try {
-      const params = searchText ? { search: searchText } : {};
-      const response = await api.get("/api/departments", { params });
-      setDepartments(response.data.data);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-      message.error("Gagal memuat data departemen");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: departments, isPending } = useFetch();
 
   useEffect(() => {
-    fetchDepartments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
-
-  const handleSearch = (value) => {
-    setSearchText(value);
-  };
-
-  const handleAdd = () => {
-    setEditingDepartment(null);
-    form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEdit = (department) => {
-    setEditingDepartment(department);
-    form.setFieldsValue({
-      name: department.name,
-      description: department.description,
-    });
-    setModalVisible(true);
-  };
-
-  const handleDelete = async (departmentId) => {
-    try {
-      await api.delete(`/api/departments/${departmentId}`);
-      message.success("Departemen berhasil dihapus");
-      fetchDepartments();
-    } catch (error) {
-      console.error("Error deleting department:", error);
-      message.error("Gagal menghapus departemen");
+    if (editingData) {
+      form.setFieldsValue({
+        name: editingData.name,
+        description: editingData.description,
+      });
+    } else {
+      form.resetFields();
     }
-  };
-
-  const handleSubmit = async (values) => {
-    try {
-      if (editingDepartment) {
-        await api.put(`/api/departments/${editingDepartment.id}`, values);
-        message.success("Departemen berhasil diperbarui");
-      } else {
-        await api.post("/api/departments", values);
-        message.success("Departemen berhasil ditambahkan");
-      }
-      setModalVisible(false);
-      fetchDepartments();
-    } catch (error) {
-      console.error("Error saving department:", error);
-      message.error("Gagal menyimpan departemen");
-    }
-  };
+  }, [editingData, form]);
 
   const columns = [
     {
@@ -109,87 +65,105 @@ const Departments = () => {
       render: (description) => description || "-",
     },
     {
-      title: "Aksi",
+      title: <SettingOutlined />,
       key: "actions",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-            title="Edit"
-          />
-          <Popconfirm
-            title="Apakah Anda yakin ingin menghapus departemen ini?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Ya"
-            cancelText="Tidak"
+      align: "center",
+      width: 60,
+      render: (_, record) => {
+        const menuItems = [
+          {
+            key: "edit",
+            label: "Edit",
+            icon: <EditOutlined />,
+            onClick: () => handleEdit(record),
+          },
+          {
+            key: "delete",
+            label: "Hapus",
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () => {
+              Modal.confirm({
+                title: "Hapus Role",
+                content: "Anda yakin akan menghapus role ini?",
+                okText: "Ya",
+                cancelText: "Tidak",
+                onOk: () => handleDelete(record.id),
+              });
+            },
+          },
+        ];
+
+        return (
+          <Dropdown
+            menu={{ items: menuItems }}
+            trigger={["click"]}
+            placement="bottomRight"
           >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              title="Hapus"
-            />
-          </Popconfirm>
-        </Space>
-      ),
+            <Button type="text" icon={<MoreOutlined />} size="small" />
+          </Dropdown>
+        );
+      },
     },
   ];
 
   return (
-    <div className="departments-container">
+    <>
       <Card>
         <div className="page-header">
-          <Title level={2}>Manajemen Departemen</Title>
+          <Title level={3}>Kelola Departemen</Title>
           <Space>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            <Button
+              variant="solid"
+              color="default"
+              icon={<PlusOutlined />}
+              onClick={handleAdd}
+            >
               Tambah Departemen
             </Button>
             <Button
               icon={<ReloadOutlined />}
-              onClick={fetchDepartments}
-              loading={loading}
+              onClick={refreshData}
+              loading={isPending}
             >
               Perbarui
             </Button>
           </Space>
         </div>
 
-        {/* Search */}
-        <div style={{ marginBottom: 16 }}>
-          <Input.Search
-            placeholder="Cari departemen"
-            allowClear
-            onSearch={handleSearch}
-            style={{ width: 300 }}
-            size="large"
-          />
-        </div>
-
         {/* Departments Table */}
         <Table
+          size="middle"
           columns={columns}
           dataSource={departments}
           rowKey="id"
-          loading={loading}
+          loading={isPending}
           scroll={{ x: 600 }}
         />
       </Card>
 
       {/* Add/Edit Modal */}
       <Modal
-        title={editingDepartment ? "Edit Departemen" : "Tambah Departemen"}
-        open={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        footer={null}
-        width={500}
+        width={450}
+        title={editingData ? "Edit Departemen" : "Tambah Departemen"}
+        open={modalOpen}
+        cancelText="Batal"
+        onCancel={() => setModalOpen(false)}
+        afterClose={() => form.resetFields()}
+        onOk={() => form.submit()}
+        okText="Simpan"
+        okButtonProps={{
+          variant: "solid",
+          color: "default",
+          loading: createMutation.isPending || updateMutation.isPending,
+        }}
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
           autoComplete="off"
+          style={{ marginTop: 16 }}
         >
           <Form.Item
             label="Nama Departemen"
@@ -208,18 +182,9 @@ const Departments = () => {
               placeholder="Masukkan deskripsi departemen (opsional)"
             />
           </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                {editingDepartment ? "Perbarui" : "Tambah"}
-              </Button>
-              <Button onClick={() => setModalVisible(false)}>Batal</Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 };
 
