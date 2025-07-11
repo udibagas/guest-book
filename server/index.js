@@ -16,6 +16,9 @@ const userRoutes = require("./routes/users");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// SPA
+app.use(express.static("../client/dist"));
+
 // Middleware
 app.use(cors());
 app.use(express.json());
