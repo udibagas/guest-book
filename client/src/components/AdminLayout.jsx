@@ -200,7 +200,7 @@ const AdminLayout = () => {
 
       {/* Profile Update Modal */}
       <Modal
-        width={450}
+        width={550}
         title="Update Profil"
         open={profileModalOpen}
         cancelText="Batal"
@@ -221,7 +221,7 @@ const AdminLayout = () => {
           layout="horizontal"
           labelAlign="left"
           requiredMark={false}
-          labelCol={{ span: 6 }}
+          labelCol={{ span: 10 }}
           style={{ marginTop: 20 }}
           colon={false}
           variant="filled"
@@ -255,7 +255,7 @@ const AdminLayout = () => {
             name="password"
             rules={[{ min: 6, message: "Password minimal 6 karakter" }]}
           >
-            <Input.Password placeholder="Masukkan password baru (kosongkan jika tidak ingin mengubah)" />
+            <Input.Password placeholder="Kosongkan jika tidak ingin mengubah" />
           </Form.Item>
         </Form>
       </Modal>
