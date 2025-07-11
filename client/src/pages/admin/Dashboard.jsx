@@ -52,9 +52,9 @@ const Dashboard = () => {
   }, [dateRange]);
 
   return (
-    <div className="dashboard-container">
+    <Card>
       <div className="dashboard-header">
-        <Title level={2}>Dashboard</Title>
+        <Title level={3}>Dashboard</Title>
         <Space>
           <RangePicker
             onChange={setDateRange}
@@ -78,7 +78,7 @@ const Dashboard = () => {
               title="Total Kunjungan"
               value={stats.totalVisits || 0}
               prefix={<CalendarOutlined />}
-              valueStyle={{ color: "#1e3a8a", fontWeight: "bold" }}
+              valueStyle={{ color: "#1e3a8a" }}
             />
           </Card>
         </Col>
@@ -88,7 +88,7 @@ const Dashboard = () => {
               title="Pengunjung Hari Ini"
               value={stats.todayVisits || 0}
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: "#3f8600", fontWeight: "bold" }}
+              valueStyle={{ color: "#3f8600" }}
             />
           </Card>
         </Col>
@@ -98,7 +98,7 @@ const Dashboard = () => {
               title="Sedang Check In"
               value={stats.checkedInVisits || 0}
               prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: "#1890ff", fontWeight: "bold" }}
+              valueStyle={{ color: "#1890ff" }}
             />
           </Card>
         </Col>
@@ -112,7 +112,7 @@ const Dashboard = () => {
               title="Total Tamu"
               value={stats.totalGuests || 0}
               prefix={<UserOutlined />}
-              valueStyle={{ color: "#722ed1", fontWeight: "bold" }}
+              valueStyle={{ color: "#722ed1" }}
             />
           </Card>
         </Col>
@@ -122,7 +122,7 @@ const Dashboard = () => {
               title="Total Host"
               value={stats.totalHosts || 0}
               prefix={<TeamOutlined />}
-              valueStyle={{ color: "#eb2f96", fontWeight: "bold" }}
+              valueStyle={{ color: "#eb2f96" }}
             />
           </Card>
         </Col>
@@ -132,7 +132,7 @@ const Dashboard = () => {
               title="Total Departemen"
               value={stats.totalDepartments || 0}
               prefix={<ApartmentOutlined />}
-              valueStyle={{ color: "#fa8c16", fontWeight: "bold" }}
+              valueStyle={{ color: "#fa8c16" }}
             />
           </Card>
         </Col>
@@ -172,7 +172,7 @@ const Dashboard = () => {
           </Card>
         </Col>
       </Row>
-    </div>
+    </Card>
   );
 };
 

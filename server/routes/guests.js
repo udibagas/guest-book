@@ -78,13 +78,13 @@ router.get("/", async (req, res) => {
       where,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [["createdAt", "DESC"]],
+      order: [["created_at", "DESC"]],
     });
 
     res.json({
       success: true,
       data: {
-        guests: rows,
+        rows: rows,
         pagination: {
           currentPage: parseInt(page),
           totalPages: Math.ceil(count / limit),
