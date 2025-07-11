@@ -138,7 +138,6 @@ const Roles = () => {
           dataSource={roles}
           rowKey="id"
           loading={isPending}
-          scroll={{ x: 600 }}
         />
       </Card>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Table,
   Card,
@@ -6,94 +6,50 @@ import {
   Button,
   Space,
   Typography,
-  message,
-  Popconfirm,
   Modal,
   Form,
+  Dropdown,
 } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  MoreOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
-import api from "../../api/axios";
+import { useCrud } from "../../hooks/useCrud";
 
 const { Title } = Typography;
 
 const Purposes = () => {
-  const [purposes, setPurposes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingPurpose, setEditingPurpose] = useState(null);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState("");
+  const {
+    form,
+    createMutation,
+    updateMutation,
+    modalOpen,
+    editingData,
+    useFetch,
+    setModalOpen,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    refreshData,
+    handleSubmit,
+  } = useCrud("/roles");
 
-  const fetchPurposes = async () => {
-    setLoading(true);
-    try {
-      const params = searchText ? { search: searchText } : {};
-      const response = await api.get("/api/purposes", { params });
-      setPurposes(response.data.data);
-    } catch (error) {
-      console.error("Error fetching purposes:", error);
-      message.error("Gagal memuat data tujuan");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: purposes, isPending } = useFetch();
 
   useEffect(() => {
-    fetchPurposes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
-
-  const handleSearch = (value) => {
-    setSearchText(value);
-  };
-
-  const handleAdd = () => {
-    setEditingPurpose(null);
-    form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEdit = (purpose) => {
-    setEditingPurpose(purpose);
-    form.setFieldsValue({
-      name: purpose.name,
-      description: purpose.description,
-    });
-    setModalVisible(true);
-  };
-
-  const handleDelete = async (purposeId) => {
-    try {
-      await api.delete(`/api/purposes/${purposeId}`);
-      message.success("Tujuan berhasil dihapus");
-      fetchPurposes();
-    } catch (error) {
-      console.error("Error deleting purpose:", error);
-      message.error("Gagal menghapus tujuan");
+    if (editingData) {
+      form.setFieldsValue({
+        name: editingData.name,
+        description: editingData.description,
+      });
+    } else {
+      form.resetFields();
     }
-  };
-
-  const handleSubmit = async (values) => {
-    try {
-      if (editingPurpose) {
-        await api.put(`/api/purposes/${editingPurpose.id}`, values);
-        message.success("Tujuan berhasil diperbarui");
-      } else {
-        await api.post("/api/purposes", values);
-        message.success("Tujuan berhasil ditambahkan");
-      }
-      setModalVisible(false);
-      fetchPurposes();
-    } catch (error) {
-      console.error("Error saving purpose:", error);
-      message.error("Gagal menyimpan tujuan");
-    }
-  };
+  }, [editingData, form]);
 
   const columns = [
     {
@@ -109,87 +65,104 @@ const Purposes = () => {
       render: (description) => description || "-",
     },
     {
-      title: "Aksi",
+      title: <SettingOutlined />,
       key: "actions",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-            title="Edit"
-          />
-          <Popconfirm
-            title="Apakah Anda yakin ingin menghapus tujuan ini?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Ya"
-            cancelText="Tidak"
+      align: "center",
+      width: 60,
+      render: (_, record) => {
+        const menuItems = [
+          {
+            key: "edit",
+            label: "Edit",
+            icon: <EditOutlined />,
+            onClick: () => handleEdit(record),
+          },
+          {
+            key: "delete",
+            label: "Hapus",
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () => {
+              Modal.confirm({
+                title: "Hapus Role",
+                content: "Anda yakin akan menghapus role ini?",
+                okText: "Ya",
+                cancelText: "Tidak",
+                onOk: () => handleDelete(record.id),
+              });
+            },
+          },
+        ];
+
+        return (
+          <Dropdown
+            menu={{ items: menuItems }}
+            trigger={["click"]}
+            placement="bottomRight"
           >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              title="Hapus"
-            />
-          </Popconfirm>
-        </Space>
-      ),
+            <Button type="text" icon={<MoreOutlined />} size="small" />
+          </Dropdown>
+        );
+      },
     },
   ];
 
   return (
-    <div className="purposes-container">
+    <>
       <Card>
         <div className="page-header">
-          <Title level={2}>Manajemen Tujuan</Title>
+          <Title level={3}>Kelola Tujuan</Title>
           <Space>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            <Button
+              variant="solid"
+              color="default"
+              icon={<PlusOutlined />}
+              onClick={handleAdd}
+            >
               Tambah Tujuan
             </Button>
             <Button
               icon={<ReloadOutlined />}
-              onClick={fetchPurposes}
-              loading={loading}
+              onClick={refreshData}
+              loading={isPending}
             >
               Perbarui
             </Button>
           </Space>
         </div>
 
-        {/* Search */}
-        <div style={{ marginBottom: 16 }}>
-          <Input.Search
-            placeholder="Cari tujuan"
-            allowClear
-            onSearch={handleSearch}
-            style={{ width: 300 }}
-            size="large"
-          />
-        </div>
-
         {/* Purposes Table */}
         <Table
+          size="middle"
           columns={columns}
           dataSource={purposes}
           rowKey="id"
-          loading={loading}
-          scroll={{ x: 600 }}
+          loading={isPending}
         />
       </Card>
 
       {/* Add/Edit Modal */}
       <Modal
-        title={editingPurpose ? "Edit Tujuan" : "Tambah Tujuan"}
-        open={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        footer={null}
-        width={500}
+        width={450}
+        title={editingData ? "Edit Tujuan" : "Tambah Tujuan"}
+        open={modalOpen}
+        cancelText="Batal"
+        onCancel={() => setModalOpen(false)}
+        afterClose={() => form.resetFields()}
+        onOk={() => form.submit()}
+        okText="Simpan"
+        okButtonProps={{
+          variant: "solid",
+          color: "default",
+          loading: createMutation.isPending || updateMutation.isPending,
+        }}
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
           autoComplete="off"
+          style={{ marginTop: 16 }}
         >
           <Form.Item
             label="Nama Tujuan"
@@ -208,18 +181,9 @@ const Purposes = () => {
               placeholder="Masukkan deskripsi tujuan (opsional)"
             />
           </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                {editingPurpose ? "Perbarui" : "Tambah"}
-              </Button>
-              <Button onClick={() => setModalVisible(false)}>Batal</Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 };
 
