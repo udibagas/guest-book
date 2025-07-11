@@ -23,12 +23,12 @@ const AdminLayout = () => {
   const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUser");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/");
   };
 
-  const adminUser = JSON.parse(localStorage.getItem("adminUser") || "{}");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const menuItems = [
     {
@@ -124,7 +124,7 @@ const AdminLayout = () => {
             <Dropdown menu={dropdownMenu} placement="bottomRight">
               <Space className="admin-user-info" style={{ cursor: "pointer" }}>
                 <Avatar icon={<UserOutlined />} />
-                <span>{adminUser.username || "Admin"}</span>
+                <span>{user.username || "Admin"}</span>
               </Space>
             </Dropdown>
           </div>

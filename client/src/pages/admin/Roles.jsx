@@ -18,6 +18,7 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import { useCrud } from "../../hooks/useCrud";
+import { useEffect } from "react";
 
 const { Title } = Typography;
 
@@ -36,8 +37,18 @@ const Roles = () => {
   } = useCrud("/roles");
 
   const { data: roles, isPending } = useFetch();
-
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (editingData) {
+      form.setFieldsValue({
+        name: editingData.name,
+        description: editingData.description,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [editingData, form]);
 
   const handleSubmit = async (values) => {
     if (editingData) {
@@ -142,7 +153,7 @@ const Roles = () => {
 
       {/* Add/Edit Modal */}
       <Modal
-        width={500}
+        width={450}
         title={editingData ? "Edit Jabatan" : "Tambah Jabatan"}
         open={modalOpen}
         cancelText="Batal"
@@ -161,6 +172,7 @@ const Roles = () => {
           layout="vertical"
           onFinish={handleSubmit}
           autoComplete="off"
+          style={{ marginTop: 16 }}
         >
           <Form.Item
             label="Nama Jabatan"

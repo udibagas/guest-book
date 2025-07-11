@@ -21,8 +21,8 @@ const Login = () => {
       const { token, user } = data;
 
       // Store token in localStorage
-      localStorage.setItem("adminToken", token);
-      localStorage.setItem("adminUser", JSON.stringify(user));
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
       message.success("Login berhasil!");
       navigate("/admin");
