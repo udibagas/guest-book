@@ -70,7 +70,7 @@ const Visits = () => {
 
   const handleCheckOut = async (visitId) => {
     try {
-      await api.put(`/api/visits/${visitId}/checkout`);
+      await api.put(`/visits/${visitId}/checkout`);
       message.success("Tamu berhasil check out");
       queryClient.invalidateQueries({ queryKey: "/visits" });
     } catch (error) {
@@ -81,7 +81,7 @@ const Visits = () => {
 
   const showVisitDetails = async (visitId) => {
     try {
-      const response = await api.get(`/api/visits/${visitId}`);
+      const response = await api.get(`/visits/${visitId}`);
       setSelectedVisit(response.data.data);
       setModalVisible(true);
     } catch (error) {
@@ -210,8 +210,9 @@ const Visits = () => {
 
         {/* Visit Table */}
         <Table
+          size="middle"
           columns={columns}
-          dataSource={data?.rows || []}
+          dataSource={data?.data?.rows || []}
           rowKey="id"
           loading={isPending}
           pagination={{
