@@ -104,6 +104,39 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/guests/search - Search guests by name, email, or company
+router.get("/search", async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: "Query parameter is required",
+      });
+    }
+
+    const guest = await Guest.findOne({
+      where: { phoneNumber: { [Op.iLike]: `%${query}%` } },
+    });
+
+    if (!guest) {
+      return res.status(404).json({
+        success: false,
+        message: "Guest not found",
+      });
+    }
+
+    res.json(guest);
+  } catch (error) {
+    console.error("Error searching guests:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error searching guests",
+      error: error.message,
+    });
+  }
+});
+
 // GET /api/guests/today - Get today's visitors
 router.get("/today", async (req, res) => {
   try {
