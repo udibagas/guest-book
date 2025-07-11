@@ -1,5 +1,18 @@
 import { useState } from "react";
-import { Layout, Menu, Avatar, Dropdown, Space, Typography } from "antd";
+import {
+  Layout,
+  Menu,
+  Avatar,
+  Dropdown,
+  Space,
+  Typography,
+  Modal,
+  Form,
+  Input,
+  message,
+} from "antd";
+import { useMutation } from "@tanstack/react-query";
+import api from "../lib/api";
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -19,6 +32,8 @@ const { Title } = Typography;
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -29,6 +44,38 @@ const AdminLayout = () => {
   };
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data) => {
+      const response = await api.put("/users/profile", data);
+      return response.data;
+    },
+    onSuccess: (response) => {
+      message.success("Profil berhasil diperbarui");
+      // Update local storage with new user data
+      const updatedUser = { ...user, ...response.data };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setProfileModalOpen(false);
+      form.resetFields();
+    },
+    onError: (error) => {
+      message.error(
+        error.response?.data?.message || "Gagal memperbarui profil"
+      );
+    },
+  });
+
+  const handleProfileUpdate = (values) => {
+    updateProfileMutation.mutate(values);
+  };
+
+  const handleProfileClick = () => {
+    form.setFieldsValue({
+      username: user.username,
+      email: user.email,
+    });
+    setProfileModalOpen(true);
+  };
 
   const menuItems = [
     {
@@ -43,38 +90,49 @@ const AdminLayout = () => {
     },
     {
       key: "/admin/guests",
-      icon: <UserOutlined />,
+      icon: <TeamOutlined />,
       label: "Tamu",
     },
     {
       key: "/admin/hosts",
-      icon: <TeamOutlined />,
+      icon: <UserOutlined />,
       label: "PIC",
-    },
-    {
-      key: "/admin/departments",
-      icon: <ApartmentOutlined />,
-      label: "Departemen",
-    },
-    {
-      key: "/admin/roles",
-      icon: <IdcardOutlined />,
-      label: "Jabatan",
-    },
-    {
-      key: "/admin/purposes",
-      icon: <AimOutlined />,
-      label: "Tujuan",
-    },
-    {
-      key: "/admin/users",
-      icon: <UsergroupAddOutlined />,
-      label: "Pengguna",
     },
   ];
 
+  if (user.role === "admin") {
+    menuItems.push(
+      {
+        key: "/admin/departments",
+        icon: <ApartmentOutlined />,
+        label: "Departemen",
+      },
+      {
+        key: "/admin/roles",
+        icon: <IdcardOutlined />,
+        label: "Jabatan",
+      },
+      {
+        key: "/admin/purposes",
+        icon: <AimOutlined />,
+        label: "Tujuan",
+      },
+      {
+        key: "/admin/users",
+        icon: <UsergroupAddOutlined />,
+        label: "Pengguna",
+      }
+    );
+  }
+
   const dropdownMenu = {
     items: [
+      {
+        key: "profile",
+        icon: <UserOutlined />,
+        label: "Profil",
+        onClick: handleProfileClick,
+      },
       {
         key: "logout",
         icon: <LogoutOutlined />,
@@ -139,6 +197,63 @@ const AdminLayout = () => {
           <Outlet />
         </Content>
       </Layout>
+
+      {/* Profile Update Modal */}
+      <Modal
+        width={450}
+        title="Update Profil"
+        open={profileModalOpen}
+        cancelText="Batal"
+        onCancel={() => {
+          setProfileModalOpen(false);
+          form.resetFields();
+        }}
+        onOk={() => form.submit()}
+        okText="Simpan"
+        okButtonProps={{
+          variant: "solid",
+          color: "default",
+          loading: updateProfileMutation.isPending,
+        }}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleProfileUpdate}
+          autoComplete="off"
+          style={{ marginTop: 16 }}
+        >
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[
+              { required: true, message: "Silakan masukkan username" },
+              { min: 3, message: "Username minimal 3 karakter" },
+            ]}
+          >
+            <Input placeholder="Masukkan username" />
+          </Form.Item>
+
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Silakan masukkan email" },
+              { type: "email", message: "Silakan masukkan email yang valid" },
+            ]}
+          >
+            <Input placeholder="Masukkan email" />
+          </Form.Item>
+
+          <Form.Item
+            label="Password Baru (opsional)"
+            name="password"
+            rules={[{ min: 6, message: "Password minimal 6 karakter" }]}
+          >
+            <Input.Password placeholder="Masukkan password baru (kosongkan jika tidak ingin mengubah)" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Layout>
   );
 };

@@ -19,7 +19,7 @@ const Users = lazy(() => import("./pages/admin/Users"));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("adminToken");
+  const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 };
 

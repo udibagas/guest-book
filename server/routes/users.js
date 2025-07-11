@@ -50,6 +50,67 @@ router.get("/:id", authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
+// Update own profile (authenticated users can update their own profile)
+router.put("/profile", authenticateToken, async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    const userId = req.user.id;
+
+    // Find user
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if username or email already exists for other users
+    if (username !== user.username || email !== user.email) {
+      const existingUser = await User.findOne({
+        where: {
+          id: { [require("sequelize").Op.ne]: userId },
+          [require("sequelize").Op.or]: [{ username }, { email }],
+        },
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Username atau email sudah digunakan",
+        });
+      }
+    }
+
+    // Prepare update data
+    const updateData = { username, email };
+
+    // Only update password if provided
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
+
+    // Update user
+    await user.update(updateData);
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user.toJSON();
+
+    res.json({
+      success: true,
+      data: userWithoutPassword,
+      message: "Profil berhasil diperbarui",
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Gagal memperbarui profil",
+    });
+  }
+});
+
 // Create new user (admin only)
 router.post("/", authenticateToken, requireAdmin, async (req, res) => {
   try {
