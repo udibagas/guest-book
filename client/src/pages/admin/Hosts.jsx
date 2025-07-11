@@ -178,31 +178,35 @@ const Hosts = () => {
       >
         <Form
           form={form}
-          layout="vertical"
+          layout="horizontal"
+          labelAlign="left"
+          requiredMark={false}
+          labelCol={{ span: 7 }}
+          style={{ marginTop: 20 }}
+          colon={false}
+          variant="filled"
           onFinish={handleSubmit}
           autoComplete="off"
-          style={{ marginTop: 16 }}
         >
           <Form.Item
             label="Nama"
             name="name"
             rules={[
-              { required: true, message: "Silakan masukkan nama host" },
+              { required: true, message: "Silakan masukkan nama PIC" },
               { min: 2, message: "Nama minimal 2 karakter" },
             ]}
           >
-            <Input placeholder="Masukkan nama host" />
+            <Input placeholder="Masukkan nama PIC" />
           </Form.Item>
 
           <Form.Item
             label="Email"
             name="email"
             rules={[
-              { required: true, message: "Silakan masukkan email host" },
               { type: "email", message: "Silakan masukkan email yang valid" },
             ]}
           >
-            <Input placeholder="Masukkan email host" />
+            <Input placeholder="Masukkan email PIC" />
           </Form.Item>
 
           <Form.Item label="Nomor Telepon" name="phoneNumber">

@@ -144,7 +144,7 @@ const Departments = () => {
 
       {/* Add/Edit Modal */}
       <Modal
-        width={450}
+        width={500}
         title={editingData ? "Edit Departemen" : "Tambah Departemen"}
         open={modalOpen}
         cancelText="Batal"
@@ -160,10 +160,15 @@ const Departments = () => {
       >
         <Form
           form={form}
-          layout="vertical"
+          layout="horizontal"
+          labelAlign="left"
+          requiredMark={false}
+          labelCol={{ span: 8 }}
+          style={{ marginTop: 20 }}
+          colon={false}
+          variant="filled"
           onFinish={handleSubmit}
           autoComplete="off"
-          style={{ marginTop: 16 }}
         >
           <Form.Item
             label="Nama Departemen"

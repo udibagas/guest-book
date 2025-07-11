@@ -159,10 +159,15 @@ const Roles = () => {
       >
         <Form
           form={form}
-          layout="vertical"
+          layout="horizontal"
+          labelAlign="left"
+          requiredMark={false}
+          labelCol={{ span: 7 }}
+          style={{ marginTop: 20 }}
+          colon={false}
+          variant="filled"
           onFinish={handleSubmit}
           autoComplete="off"
-          style={{ marginTop: 16 }}
         >
           <Form.Item
             label="Nama Jabatan"
