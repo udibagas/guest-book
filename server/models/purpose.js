@@ -31,9 +31,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: "purposes",
-      timestamps: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
       indexes: [
         {
           fields: ["name"],

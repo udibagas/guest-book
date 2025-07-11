@@ -73,9 +73,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: "visits",
-      timestamps: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
       indexes: [
         {
           fields: ["guest_id"],

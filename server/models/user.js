@@ -47,9 +47,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: "users",
-      timestamps: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
       hooks: {
         beforeCreate: async (user) => {
           if (user.password) {
