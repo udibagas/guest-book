@@ -56,7 +56,6 @@ const Roles = () => {
       title: "Nama Jabatan",
       dataIndex: "name",
       key: "name",
-      sorter: true,
     },
     {
       title: "Deskripsi",

@@ -35,7 +35,6 @@ const Guests = () => {
       title: "Nama",
       dataIndex: "name",
       key: "name",
-      sorter: true,
     },
     {
       title: "Email",

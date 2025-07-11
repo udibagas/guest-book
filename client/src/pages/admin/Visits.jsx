@@ -125,7 +125,7 @@ const Visits = () => {
       title: "Waktu Masuk",
       dataIndex: "checkInTime",
       key: "checkInTime",
-      render: (time) => dayjs(time).format("DD/MM/YYYY HH:mm"),
+      render: (time) => dayjs(time).format("DD-MMM-YYYY HH:mm"),
     },
     {
       title: "Status",
@@ -292,11 +292,13 @@ const Visits = () => {
                 {selectedVisit.Host?.department || "Tidak ada"}
               </Descriptions.Item>
               <Descriptions.Item label="Waktu Masuk">
-                {dayjs(selectedVisit.checkInTime).format("DD/MM/YYYY HH:mm")}
+                {dayjs(selectedVisit.checkInTime).format("DD-MMM-YYYY HH:mm")}
               </Descriptions.Item>
               {selectedVisit.checkOutTime && (
                 <Descriptions.Item label="Waktu Keluar">
-                  {dayjs(selectedVisit.checkOutTime).format("DD/MM/YYYY HH:mm")}
+                  {dayjs(selectedVisit.checkOutTime).format(
+                    "DD-MMM-YYYY HH:mm"
+                  )}
                 </Descriptions.Item>
               )}
               <Descriptions.Item label="Status">

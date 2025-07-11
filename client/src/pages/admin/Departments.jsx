@@ -56,7 +56,6 @@ const Departments = () => {
       title: "Nama Departemen",
       dataIndex: "name",
       key: "name",
-      sorter: true,
     },
     {
       title: "Deskripsi",

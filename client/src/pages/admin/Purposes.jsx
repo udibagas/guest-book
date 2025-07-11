@@ -56,7 +56,6 @@ const Purposes = () => {
       title: "Nama Tujuan",
       dataIndex: "name",
       key: "name",
-      sorter: true,
     },
     {
       title: "Deskripsi",

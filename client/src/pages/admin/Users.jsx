@@ -59,7 +59,6 @@ const Users = () => {
       title: "Username",
       dataIndex: "username",
       key: "username",
-      sorter: true,
     },
     {
       title: "Email",
