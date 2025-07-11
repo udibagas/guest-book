@@ -10,7 +10,7 @@ import {
   message,
   Result,
   Select,
-  Divider,
+  Steps,
 } from "antd";
 import {
   UserOutlined,
@@ -22,6 +22,7 @@ import {
   CameraOutlined,
   UploadOutlined,
   ArrowLeftOutlined,
+  ArrowRightOutlined,
   AimOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
@@ -40,6 +41,7 @@ const GuestForm = () => {
   const [idPhoto, setIdPhoto] = useState(null);
   const [idPhotoUrl, setIdPhotoUrl] = useState(null);
   const [showCustomPurpose, setShowCustomPurpose] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const webcamRef = useRef(null);
   const navigate = useNavigate();
 
@@ -51,15 +53,302 @@ const GuestForm = () => {
     setShowCustomPurpose(purpose && purpose.name === "Other");
   };
 
-  const handleSubmit = async (values) => {
-    if (!idPhoto) {
-      message.error("Silakan unggah atau ambil foto identitas Anda");
-      return;
-    }
-
-    setLoading(true);
-
+  const next = async () => {
     try {
+      // Validate current step fields and save form data
+      if (currentStep === 0) {
+        await form.validateFields(["name", "phoneNumber", "email"]);
+      } else if (currentStep === 1) {
+        await form.validateFields(["PurposeId", "HostId"]);
+        if (showCustomPurpose) {
+          await form.validateFields(["customPurpose"]);
+        }
+      }
+
+      // Save current form data to preserve it between steps
+      const currentValues = form.getFieldsValue();
+      console.log(
+        "Saving form values at step",
+        currentStep,
+        ":",
+        currentValues
+      );
+
+      setCurrentStep(currentStep + 1);
+    } catch {
+      // Validation failed, stay on current step
+    }
+  };
+
+  const prev = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const steps = [
+    {
+      title: "Informasi Pribadi",
+      content: "personal-info",
+    },
+    {
+      title: "Informasi Kunjungan",
+      content: "visit-info",
+    },
+    {
+      title: "Foto Identitas",
+      content: "id-photo",
+    },
+  ];
+
+  const renderPersonalInfoStep = () => (
+    <>
+      <Form.Item
+        label="Nama Lengkap"
+        name="name"
+        rules={[
+          { required: true, message: "Silakan masukkan nama lengkap Anda" },
+          { min: 2, message: "Nama minimal 2 karakter" },
+          { max: 100, message: "Nama maksimal 100 karakter" },
+        ]}
+      >
+        <Input
+          prefix={<UserOutlined />}
+          placeholder="Masukkan nama lengkap Anda"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Nomor Telepon"
+        name="phoneNumber"
+        rules={[
+          {
+            required: true,
+            message: "Silakan masukkan nomor telepon Anda",
+          },
+          {
+            pattern: /^[0-9+\-\s()]+$/,
+            message: "Silakan masukkan nomor telepon yang valid",
+          },
+          { min: 10, message: "Nomor telepon minimal 10 digit" },
+        ]}
+      >
+        <Input
+          prefix={<PhoneOutlined />}
+          placeholder="Masukkan nomor telepon Anda"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Alamat Email"
+        name="email"
+        rules={[
+          {
+            type: "email",
+            message: "Silakan masukkan alamat email yang valid",
+          },
+        ]}
+      >
+        <Input
+          prefix={<MailOutlined />}
+          placeholder="Masukkan alamat email Anda"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Perusahaan"
+        name="company"
+        rules={[
+          {
+            max: 100,
+            message: "Nama perusahaan maksimal 100 karakter",
+          },
+        ]}
+      >
+        <Input
+          prefix={<BankOutlined />}
+          placeholder="Masukkan nama perusahaan (opsional)"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Jabatan/Posisi"
+        name="role"
+        rules={[
+          { min: 2, message: "Jabatan minimal 2 karakter" },
+          { max: 100, message: "Jabatan maksimal 100 karakter" },
+        ]}
+      >
+        <Input
+          prefix={<IdcardOutlined />}
+          placeholder="Masukkan jabatan atau posisi Anda (opsional)"
+        />
+      </Form.Item>
+    </>
+  );
+
+  const renderVisitInfoStep = () => (
+    <>
+      <Form.Item
+        label="Tujuan Kunjungan"
+        name="PurposeId"
+        rules={[
+          {
+            required: true,
+            message: "Silakan pilih tujuan kunjungan Anda",
+          },
+        ]}
+      >
+        <Select
+          showSearch
+          optionFilterProp="text"
+          placeholder="Pilih tujuan kunjungan"
+          onChange={handlePurposeChange}
+          options={purposes.map((purpose) => ({
+            text: purpose.name,
+            label: (
+              <>
+                {" "}
+                <AimOutlined /> {purpose.name}
+              </>
+            ),
+            value: purpose.id,
+          }))}
+        />
+      </Form.Item>
+
+      {showCustomPurpose && (
+        <Form.Item
+          label="Silakan sebutkan tujuan Anda"
+          name="customPurpose"
+          rules={[
+            { required: true, message: "Silakan sebutkan tujuan Anda" },
+            { max: 500, message: "Tujuan maksimal 500 karakter" },
+          ]}
+        >
+          <TextArea
+            rows={3}
+            placeholder="Silakan jelaskan tujuan spesifik Anda"
+            showCount
+            maxLength={500}
+          />
+        </Form.Item>
+      )}
+
+      <Form.Item
+        label="Orang yang Akan Ditemui"
+        name="HostId"
+        rules={[{ required: true, message: "Pilih orang yang akan ditemui" }]}
+      >
+        <Select
+          showSearch
+          optionFilterProp="text"
+          placeholder="Pilih orang yang akan ditemui"
+          allowClear
+          options={hosts.map((host) => ({
+            text: host.name,
+            label: (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  <UserOutlined /> {host.name}{" "}
+                  <i style={{ color: "#999" }}>{host.Role.name}</i>
+                </div>
+                {host.Department.name}
+              </div>
+            ),
+            value: host.id,
+          }))}
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Catatan Tambahan"
+        name="notes"
+        rules={[{ max: 1000, message: "Catatan maksimal 1000 karakter" }]}
+      >
+        <TextArea
+          rows={3}
+          placeholder="Informasi tambahan (opsional)"
+          showCount
+          maxLength={1000}
+        />
+      </Form.Item>
+    </>
+  );
+
+  const renderIdPhotoStep = () => (
+    <Form.Item label="Foto Identitas" required>
+      <div className="photo-upload-container">
+        {idPhotoUrl ? (
+          <div>
+            <img src={idPhotoUrl} alt="ID Preview" className="photo-preview" />
+            <div style={{ marginTop: 16 }}>
+              <Space>
+                <Button
+                  icon={<CameraOutlined />}
+                  onClick={() => setShowCamera(true)}
+                >
+                  Ulang
+                </Button>
+                <Upload
+                  accept="image/*"
+                  showUploadList={false}
+                  beforeUpload={() => false}
+                  onChange={handleFileUpload}
+                >
+                  <Button icon={<UploadOutlined />}>Unggah Foto</Button>
+                </Upload>
+              </Space>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <FileTextOutlined style={{ fontSize: 48, color: "#d9d9d9" }} />
+            <div style={{ marginTop: 16 }}>
+              <Text>Silakan unggah atau ambil foto identitas Anda</Text>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <Space>
+                <Button
+                  type="primary"
+                  icon={<CameraOutlined />}
+                  onClick={() => setShowCamera(true)}
+                >
+                  Ambil Foto
+                </Button>
+                <Upload
+                  accept="image/*"
+                  showUploadList={false}
+                  beforeUpload={() => false}
+                  onChange={handleFileUpload}
+                >
+                  <Button icon={<UploadOutlined />}>Unggah Foto</Button>
+                </Upload>
+              </Space>
+            </div>
+          </div>
+        )}
+      </div>
+    </Form.Item>
+  );
+
+  const handleSubmit = async () => {
+    try {
+      // Get all form values including the current ones
+      const allValues = form.getFieldsValue();
+      console.log("Form values:", allValues); // Debug log
+
+      if (!idPhoto) {
+        message.error("Silakan unggah atau ambil foto identitas Anda");
+        return;
+      }
+
+      setLoading(true);
+
       // First upload the photo
       const formData = new FormData();
       formData.append("idPhoto", idPhoto);
@@ -70,20 +359,20 @@ const GuestForm = () => {
         },
       });
 
-      // Prepare visit data
+      // Prepare visit data using all form values
       const visitData = {
         guestData: {
-          name: values.name,
-          phoneNumber: values.phoneNumber,
-          email: values.email,
-          company: values.company || null,
-          role: values.role,
+          name: allValues.name,
+          phoneNumber: allValues.phoneNumber,
+          email: allValues.email,
+          company: allValues.company || null,
+          role: allValues.role,
           idPhotoPath: uploadResponse.data.data.filePath,
         },
-        PurposeId: values.PurposeId,
-        HostId: values.HostId || null,
-        customPurpose: values.customPurpose || null,
-        notes: values.notes || null,
+        PurposeId: allValues.PurposeId,
+        HostId: allValues.HostId || null,
+        customPurpose: allValues.customPurpose || null,
+        notes: allValues.notes || null,
       };
 
       await api.post("/visits", visitData);
@@ -93,8 +382,7 @@ const GuestForm = () => {
     } catch (error) {
       console.error("Registration error:", error);
       message.error(
-        error.response?.data?.message ||
-          "Registration failed. Please try again."
+        error.response?.data?.message || "Registrasi gagal. Silakan coba lagi."
       );
     } finally {
       setLoading(false);
@@ -191,268 +479,84 @@ const GuestForm = () => {
           </Space>
         }
       >
+        <Steps
+          current={currentStep}
+          items={steps}
+          style={{ marginBottom: 32 }}
+        />
+
         <Form
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
           autoComplete="off"
           size="large"
+          preserve={true}
         >
-          <Title level={4}>Informasi Pribadi</Title>
-
-          <Form.Item
-            label="Nama Lengkap"
-            name="name"
-            rules={[
-              { required: true, message: "Silakan masukkan nama lengkap Anda" },
-              { min: 2, message: "Nama minimal 2 karakter" },
-              { max: 100, message: "Nama maksimal 100 karakter" },
-            ]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="Masukkan nama lengkap Anda"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Nomor Telepon"
-            name="phoneNumber"
-            rules={[
-              {
-                required: true,
-                message: "Silakan masukkan nomor telepon Anda",
-              },
-              {
-                pattern: /^[0-9+\-\s()]+$/,
-                message: "Silakan masukkan nomor telepon yang valid",
-              },
-              { min: 10, message: "Nomor telepon minimal 10 digit" },
-            ]}
-          >
-            <Input
-              prefix={<PhoneOutlined />}
-              placeholder="Masukkan nomor telepon Anda"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Alamat Email"
-            name="email"
-            rules={[
-              {
-                type: "email",
-                message: "Silakan masukkan alamat email yang valid",
-              },
-            ]}
-          >
-            <Input
-              prefix={<MailOutlined />}
-              placeholder="Masukkan alamat email Anda"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Perusahaan"
-            name="company"
-            rules={[
-              {
-                max: 100,
-                message: "Nama perusahaan maksimal 100 karakter",
-              },
-            ]}
-          >
-            <Input
-              prefix={<BankOutlined />}
-              placeholder="Masukkan nama perusahaan (opsional)"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Jabatan/Posisi"
-            name="role"
-            rules={[
-              { min: 2, message: "Jabatan minimal 2 karakter" },
-              { max: 100, message: "Jabatan maksimal 100 karakter" },
-            ]}
-          >
-            <Input
-              prefix={<IdcardOutlined />}
-              placeholder="Masukkan jabatan atau posisi Anda (opsional)"
-            />
-          </Form.Item>
-
-          <Divider />
-
-          <Title level={4}>Informasi Kunjungan</Title>
-
-          <Form.Item
-            label="Tujuan Kunjungan"
-            name="PurposeId"
-            rules={[
-              {
-                required: true,
-                message: "Silakan pilih tujuan kunjungan Anda",
-              },
-            ]}
-          >
-            <Select
-              showSearch
-              optionFilterProp="text"
-              placeholder="Pilih tujuan kunjungan"
-              onChange={handlePurposeChange}
-              options={purposes.map((purpose) => ({
-                text: purpose.name,
-                label: (
-                  <>
-                    {" "}
-                    <AimOutlined /> {purpose.name}
-                  </>
-                ),
-                value: purpose.id,
-              }))}
-            />
-          </Form.Item>
-
-          {showCustomPurpose && (
-            <Form.Item
-              label="Silakan sebutkan tujuan Anda"
-              name="customPurpose"
-              rules={[
-                { required: true, message: "Silakan sebutkan tujuan Anda" },
-                { max: 500, message: "Tujuan maksimal 500 karakter" },
-              ]}
-            >
-              <TextArea
-                rows={3}
-                placeholder="Silakan jelaskan tujuan spesifik Anda"
-                showCount
-                maxLength={500}
-              />
-            </Form.Item>
-          )}
-
-          <Form.Item
-            label="Orang yang Akan Ditemui"
-            name="HostId"
-            rules={[
-              { required: true, message: "Pilih orang yang akan ditemui" },
-            ]}
-          >
-            <Select
-              showSearch
-              optionFilterProp="text"
-              placeholder="Pilih orang yang akan ditemui"
-              allowClear
-              options={hosts.map((host) => ({
-                text: host.name,
-                label: (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div>
-                      <UserOutlined /> {host.name}{" "}
-                      <i style={{ color: "#999" }}>{host.Role.name}</i>
-                    </div>
-                    {host.Department.name}
-                  </div>
-                ),
-                value: host.id,
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Catatan Tambahan"
-            name="notes"
-            rules={[{ max: 1000, message: "Catatan maksimal 1000 karakter" }]}
-          >
-            <TextArea
-              rows={3}
-              placeholder="Informasi tambahan (opsional)"
-              showCount
-              maxLength={1000}
-            />
-          </Form.Item>
-
-          <Divider />
-
-          <Form.Item label="Foto Identitas" required>
-            <div className="photo-upload-container">
-              {idPhotoUrl ? (
-                <div>
-                  <img
-                    src={idPhotoUrl}
-                    alt="ID Preview"
-                    className="photo-preview"
-                  />
-                  <div style={{ marginTop: 16 }}>
-                    <Space>
-                      <Button
-                        icon={<CameraOutlined />}
-                        onClick={() => setShowCamera(true)}
-                      >
-                        Ulang
-                      </Button>
-                      <Upload
-                        accept="image/*"
-                        showUploadList={false}
-                        beforeUpload={() => false}
-                        onChange={handleFileUpload}
-                      >
-                        <Button icon={<UploadOutlined />}>Unggah Foto</Button>
-                      </Upload>
-                    </Space>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <FileTextOutlined
-                    style={{ fontSize: 48, color: "#d9d9d9" }}
-                  />
-                  <div style={{ marginTop: 16 }}>
-                    <Text>Please upload or capture your ID photo</Text>
-                  </div>
-                  <div style={{ marginTop: 16 }}>
-                    <Space>
-                      <Button
-                        type="primary"
-                        icon={<CameraOutlined />}
-                        onClick={() => setShowCamera(true)}
-                      >
-                        Ambil Foto
-                      </Button>
-                      <Upload
-                        accept="image/*"
-                        showUploadList={false}
-                        beforeUpload={() => false}
-                        onChange={handleFileUpload}
-                      >
-                        <Button icon={<UploadOutlined />}>Unggah Foto</Button>
-                      </Upload>
-                    </Space>
-                  </div>
-                </div>
-              )}
+          <div className="steps-content" style={{ minHeight: 300 }}>
+            <div style={{ display: currentStep === 0 ? "block" : "none" }}>
+              {renderPersonalInfoStep()}
             </div>
-          </Form.Item>
+            <div style={{ display: currentStep === 1 ? "block" : "none" }}>
+              {renderVisitInfoStep()}
+            </div>
+            <div style={{ display: currentStep === 2 ? "block" : "none" }}>
+              {renderIdPhotoStep()}
+            </div>
+          </div>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              size="large"
-              block
-              style={{ height: "50px", fontSize: "16px" }}
-            >
-              {loading ? "Mendaftar..." : "Selesaikan Registrasi"}
-            </Button>
-          </Form.Item>
+          <div className="steps-action" style={{ marginTop: 24 }}>
+            {currentStep > 0 && (
+              <Button
+                style={{ margin: "10px 8px" }}
+                onClick={prev}
+                icon={<ArrowLeftOutlined />}
+              >
+                Sebelumnya
+              </Button>
+            )}
+            {currentStep < steps.length - 1 && (
+              <Button
+                type="primary"
+                onClick={next}
+                icon={<ArrowRightOutlined />}
+              >
+                Selanjutnya
+              </Button>
+            )}
+            {currentStep === steps.length - 1 && (
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                size="large"
+                onClick={async () => {
+                  try {
+                    // Validate all required fields before submission
+                    const requiredFields = [
+                      "name",
+                      "phoneNumber",
+                      "PurposeId",
+                      "HostId",
+                    ];
+                    if (showCustomPurpose) {
+                      requiredFields.push("customPurpose");
+                    }
+                    await form.validateFields(requiredFields);
+
+                    // If validation passes, submit the form
+                    form.submit();
+                  } catch {
+                    message.error(
+                      "Silakan lengkapi semua field yang wajib diisi"
+                    );
+                  }
+                }}
+              >
+                {loading ? "Mendaftar..." : "Selesaikan Registrasi"}
+              </Button>
+            )}
+          </div>
         </Form>
       </Card>
 

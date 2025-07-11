@@ -194,6 +194,25 @@ body {
   padding: 32px;
 }
 
+/* Step form styles */
+.guest-form-container .ant-steps {
+  margin-bottom: 32px !important;
+}
+
+.guest-form-container .steps-content {
+  min-height: 300px;
+  padding: 24px 0;
+}
+
+.guest-form-container .steps-action {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.guest-form-container .steps-action .ant-btn {
+  margin: 0 8px;
+}
+
 .photo-upload-container {
   text-align: center;
   padding: 20px;
@@ -625,6 +644,21 @@ body {
   
   .guest-form-container .ant-card-body {
     padding: 16px;
+  }
+
+  .guest-form-container .steps-content {
+    min-height: 250px;
+    padding: 16px 0;
+  }
+
+  .guest-form-container .ant-steps {
+    margin-bottom: 24px !important;
+  }
+
+  .guest-form-container .steps-action .ant-btn {
+    margin: 4px;
+    width: 100%;
+    max-width: 200px;
   }
   
   .photo-preview {
