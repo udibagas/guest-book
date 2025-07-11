@@ -15,13 +15,6 @@ module.exports = (sequelize, DataTypes) => {
           len: [2, 100],
         },
       },
-      department: {
-        type: DataTypes.STRING,
-        allowNull: true, // Made nullable since we'll use departmentId
-        validate: {
-          len: [0, 100],
-        },
-      },
       departmentId: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -29,13 +22,6 @@ module.exports = (sequelize, DataTypes) => {
         references: {
           model: "departments",
           key: "id",
-        },
-      },
-      role: {
-        type: DataTypes.STRING,
-        allowNull: true, // Made nullable since we'll use roleId
-        validate: {
-          len: [0, 100],
         },
       },
       roleId: {

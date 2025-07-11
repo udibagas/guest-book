@@ -40,8 +40,8 @@ router.get("/", async (req, res) => {
     }
 
     const includeModels = [
-      { model: Department, as: "Department" },
-      { model: Role, as: "Role" },
+      { model: Department, as: "Department", attributes: ["id", "name"] },
+      { model: Role, as: "Role", attributes: ["id", "name"] },
     ];
 
     let hosts;

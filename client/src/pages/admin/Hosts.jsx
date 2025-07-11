@@ -73,13 +73,13 @@ const Hosts = () => {
     },
     {
       title: "Departemen",
-      dataIndex: "department",
+      dataIndex: ["Department", "name"],
       key: "department",
       render: (departmentName) => departmentName || "-",
     },
     {
       title: "Jabatan",
-      dataIndex: "role",
+      dataIndex: ["Role", "name"],
       key: "role",
       render: (roleName) => roleName || "-",
     },
@@ -181,6 +181,7 @@ const Hosts = () => {
           layout="vertical"
           onFinish={handleSubmit}
           autoComplete="off"
+          style={{ marginTop: 16 }}
         >
           <Form.Item
             label="Nama"
@@ -204,7 +205,7 @@ const Hosts = () => {
             <Input placeholder="Masukkan email host" />
           </Form.Item>
 
-          <Form.Item label="Nomor Telepon" name="phone">
+          <Form.Item label="Nomor Telepon" name="phoneNumber">
             <Input placeholder="Masukkan nomor telepon (opsional)" />
           </Form.Item>
 
