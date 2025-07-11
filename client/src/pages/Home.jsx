@@ -1,5 +1,10 @@
-import { Typography, Button, Space, QRCode } from "antd";
+import { Typography, Button, Space, QRCode, Card, Row, Col } from "antd";
 import { useNavigate } from "react-router";
+import {
+  QrcodeOutlined,
+  FormOutlined,
+  SettingOutlined,
+} from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
 
@@ -11,70 +16,135 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <Space direction="vertical" size="large" align="center">
-        <Title level={1} style={{ color: "white", marginBottom: 0 }}>
-          Welcome to Mitrateknik
-        </Title>
+      <div className="home-content">
+        <Row gutter={[32, 32]} align="middle" justify="center">
+          {/* Welcome Section */}
+          <Col xs={24} lg={12} className="welcome-section">
+            <Space direction="vertical" size="large" style={{ width: "100%" }}>
+              <div className="welcome-text">
+                <Title
+                  level={1}
+                  className="welcome-title"
+                  style={{ marginBottom: 16 }}
+                >
+                  Selamat Datang di
+                </Title>
+                <Title
+                  level={1}
+                  className="company-name"
+                  style={{ marginBottom: 24, color: "#1890ff" }}
+                >
+                  PT Mitrateknik
+                </Title>
+                <Paragraph className="welcome-description">
+                  Terima kasih telah berkunjung. Silakan daftarkan kunjungan
+                  Anda dengan memindai kode QR di samping atau mengklik tombol
+                  formulir tamu untuk mengisi data kunjungan.
+                </Paragraph>
+              </div>
 
-        <Paragraph
-          style={{ fontSize: "18px", textAlign: "center", color: "white" }}
-        >
-          We're delighted to have you here. Please register your visit by
-          scanning the QR code below or clicking the button to fill out our
-          guest form.
-        </Paragraph>
+              <Space size="large" className="action-buttons" wrap>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<FormOutlined />}
+                  onClick={() => navigate("/guest-form")}
+                  className="primary-btn"
+                >
+                  Isi Formulir Tamu
+                </Button>
 
-        <div className="qr-container">
-          <Title
-            level={3}
-            style={{ marginBottom: 16, textAlign: "center", color: "#333" }}
-          >
-            Scan to Register
-          </Title>
-          <QRCode value={guestFormUrl} size={200} />
-          <Paragraph
-            style={{ marginTop: 16, textAlign: "center", color: "#666" }}
-          >
-            Scan this QR code with your phone's camera
-          </Paragraph>
+                <Button
+                  size="large"
+                  icon={<SettingOutlined />}
+                  onClick={() => navigate("/login")}
+                  className="secondary-btn"
+                >
+                  Panel Admin
+                </Button>
+              </Space>
+            </Space>
+          </Col>
+
+          {/* QR Code Section */}
+          <Col xs={24} lg={12} className="qr-section">
+            <Card
+              className="qr-card"
+              styles={{
+                body: { padding: "40px", textAlign: "center" },
+              }}
+            >
+              <Space
+                direction="vertical"
+                size="large"
+                style={{ width: "100%" }}
+              >
+                <div className="qr-header">
+                  <QrcodeOutlined className="qr-icon" />
+                  <Title
+                    level={3}
+                    style={{ marginBottom: 8, color: "#1890ff" }}
+                  >
+                    Pindai untuk Mendaftar
+                  </Title>
+                  <Paragraph style={{ color: "#666", marginBottom: 24 }}>
+                    Gunakan kamera ponsel Anda untuk memindai kode QR
+                  </Paragraph>
+                </div>
+
+                <div className="qr-code-wrapper">
+                  <QRCode
+                    value={guestFormUrl}
+                    size={200}
+                    style={{
+                      padding: 16,
+                      backgroundColor: "white",
+                      borderRadius: 8,
+                      border: "1px solid #f0f0f0",
+                    }}
+                  />
+                </div>
+
+                <Paragraph style={{ fontSize: "14px", color: "#999" }}>
+                  Scan kode QR ini dengan kamera ponsel Anda
+                </Paragraph>
+              </Space>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Footer Section */}
+        <div className="footer-section">
+          <Card className="footer-card">
+            <Row gutter={[24, 24]} justify="center">
+              <Col xs={24} sm={12} md={8} className="footer-item">
+                <Title level={5} style={{ color: "#1890ff", marginBottom: 8 }}>
+                  Bantuan
+                </Title>
+                <Paragraph style={{ marginBottom: 0, color: "#666" }}>
+                  Hubungi meja resepsionis kami untuk bantuan
+                </Paragraph>
+              </Col>
+              <Col xs={24} sm={12} md={8} className="footer-item">
+                <Title level={5} style={{ color: "#1890ff", marginBottom: 8 }}>
+                  Jam Operasional
+                </Title>
+                <Paragraph style={{ marginBottom: 0, color: "#666" }}>
+                  Senin - Jumat: 08:00 - 17:00 WIB
+                </Paragraph>
+              </Col>
+              <Col xs={24} sm={12} md={8} className="footer-item">
+                <Title level={5} style={{ color: "#1890ff", marginBottom: 8 }}>
+                  Keamanan
+                </Title>
+                <Paragraph style={{ marginBottom: 0, color: "#666" }}>
+                  Semua kunjungan dicatat untuk keamanan bersama
+                </Paragraph>
+              </Col>
+            </Row>
+          </Card>
         </div>
-
-        <Space size="large">
-          <Button
-            type="primary"
-            size="large"
-            onClick={() => navigate("/guest-form")}
-            style={{
-              height: "50px",
-              padding: "0 40px",
-              fontSize: "16px",
-              borderRadius: "8px",
-            }}
-          >
-            Fill Guest Form
-          </Button>
-
-          <Button
-            size="large"
-            onClick={() => navigate("/admin")}
-            style={{
-              height: "50px",
-              padding: "0 40px",
-              fontSize: "16px",
-              borderRadius: "8px",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              borderColor: "white",
-              color: "white",
-            }}
-          >
-            Admin Panel
-          </Button>
-        </Space>
-
-        <Paragraph style={{ marginTop: 32, color: "rgba(255, 255, 255, 0.8)" }}>
-          For assistance, please contact our reception desk
-        </Paragraph>
-      </Space>
+      </div>
     </div>
   );
 };

@@ -27,7 +27,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import Webcam from "react-webcam";
-import axios from "axios";
+import api from "../api/axios";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -56,27 +56,27 @@ const GuestForm = () => {
 
   const fetchPurposes = async () => {
     try {
-      const response = await axios.get("/api/purposes");
+      const response = await api.get("/api/purposes");
       setPurposes(response.data.data);
     } catch (error) {
       console.error("Error fetching purposes:", error);
-      message.error("Failed to load purposes");
+      message.error("Gagal memuat data tujuan kunjungan");
     }
   };
 
   const fetchHosts = async () => {
     try {
-      const response = await axios.get("/api/hosts");
+      const response = await api.get("/api/hosts");
       setHosts(response.data.data);
     } catch (error) {
       console.error("Error fetching hosts:", error);
-      message.error("Failed to load hosts");
+      message.error("Gagal memuat data host");
     }
   };
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get("/api/hosts/departments");
+      const response = await api.get("/api/hosts/departments");
       setDepartments(response.data.data);
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -85,7 +85,7 @@ const GuestForm = () => {
 
   const fetchHostsByDepartment = async (department) => {
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `/api/hosts?department=${encodeURIComponent(department)}`
       );
       setHosts(response.data.data);
@@ -111,7 +111,7 @@ const GuestForm = () => {
 
   const handleSubmit = async (values) => {
     if (!idPhoto) {
-      message.error("Please upload or capture your ID photo");
+      message.error("Silakan unggah atau ambil foto identitas Anda");
       return;
     }
 
@@ -122,15 +122,11 @@ const GuestForm = () => {
       const formData = new FormData();
       formData.append("idPhoto", idPhoto);
 
-      const uploadResponse = await axios.post(
-        "/api/upload/id-photo",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const uploadResponse = await api.post("/api/upload/id-photo", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       // Prepare visit data
       const visitData = {
@@ -148,7 +144,7 @@ const GuestForm = () => {
         notes: values.notes || null,
       };
 
-      await axios.post("/api/visits", visitData);
+      await api.post("/api/visits", visitData);
 
       message.success("Registration successful! Welcome to Mitrateknik.");
       setSubmitted(true);
@@ -212,11 +208,11 @@ const GuestForm = () => {
       <div className="guest-form-container">
         <Result
           status="success"
-          title="Registration Successful!"
-          subTitle="Thank you for registering. You are now checked in to Mitrateknik. Have a pleasant visit!"
+          title="Registrasi Berhasil!"
+          subTitle="Terima kasih telah mendaftar. Anda sekarang telah check-in ke Mitrateknik. Selamat berkunjung!"
           extra={[
             <Button type="primary" key="home" onClick={() => navigate("/")}>
-              Back to Home
+              Kembali ke Beranda
             </Button>,
             <Button
               key="new"
@@ -229,7 +225,7 @@ const GuestForm = () => {
                 setShowCustomPurpose(false);
               }}
             >
-              Register Another Guest
+              Daftarkan Tamu Lain
             </Button>,
           ]}
         />
@@ -252,7 +248,7 @@ const GuestForm = () => {
               onClick={() => navigate("/")}
             />
             <Title level={2} style={{ margin: 0 }}>
-              Guest Registration
+              Registrasi Tamu
             </Title>
           </Space>
         }
@@ -265,102 +261,111 @@ const GuestForm = () => {
           autoComplete="off"
           size="large"
         >
-          <Title level={4}>Personal Information</Title>
+          <Title level={4}>Informasi Pribadi</Title>
 
           <Form.Item
-            label="Full Name"
+            label="Nama Lengkap"
             name="name"
             rules={[
-              { required: true, message: "Please enter your full name" },
-              { min: 2, message: "Name must be at least 2 characters" },
-              { max: 100, message: "Name must not exceed 100 characters" },
+              { required: true, message: "Silakan masukkan nama lengkap Anda" },
+              { min: 2, message: "Nama minimal 2 karakter" },
+              { max: 100, message: "Nama maksimal 100 karakter" },
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="Enter your full name"
+              placeholder="Masukkan nama lengkap Anda"
             />
           </Form.Item>
 
           <Form.Item
-            label="Phone Number"
+            label="Nomor Telepon"
             name="phoneNumber"
             rules={[
-              { required: true, message: "Please enter your phone number" },
+              {
+                required: true,
+                message: "Silakan masukkan nomor telepon Anda",
+              },
               {
                 pattern: /^[0-9+\-\s()]+$/,
-                message: "Please enter a valid phone number",
+                message: "Silakan masukkan nomor telepon yang valid",
               },
-              { min: 10, message: "Phone number must be at least 10 digits" },
+              { min: 10, message: "Nomor telepon minimal 10 digit" },
             ]}
           >
             <Input
               prefix={<PhoneOutlined />}
-              placeholder="Enter your phone number"
+              placeholder="Masukkan nomor telepon Anda"
             />
           </Form.Item>
 
           <Form.Item
-            label="Email Address"
+            label="Alamat Email"
             name="email"
             rules={[
-              { required: true, message: "Please enter your email address" },
-              { type: "email", message: "Please enter a valid email address" },
+              { required: true, message: "Silakan masukkan alamat email Anda" },
+              {
+                type: "email",
+                message: "Silakan masukkan alamat email yang valid",
+              },
             ]}
           >
             <Input
               prefix={<MailOutlined />}
-              placeholder="Enter your email address"
+              placeholder="Masukkan alamat email Anda"
             />
           </Form.Item>
 
           <Form.Item
-            label="Company"
+            label="Perusahaan"
             name="company"
             rules={[
               {
                 max: 100,
-                message: "Company name must not exceed 100 characters",
+                message: "Nama perusahaan maksimal 100 karakter",
               },
             ]}
           >
             <Input
               prefix={<BankOutlined />}
-              placeholder="Enter your company name (optional)"
+              placeholder="Masukkan nama perusahaan (opsional)"
             />
           </Form.Item>
 
           <Form.Item
-            label="Role/Position"
+            label="Jabatan/Posisi"
             name="role"
             rules={[
-              { required: true, message: "Please enter your role or position" },
-              { min: 2, message: "Role must be at least 2 characters" },
-              { max: 100, message: "Role must not exceed 100 characters" },
+              {
+                required: true,
+                message: "Silakan masukkan jabatan atau posisi Anda",
+              },
+              { min: 2, message: "Jabatan minimal 2 karakter" },
+              { max: 100, message: "Jabatan maksimal 100 karakter" },
             ]}
           >
             <Input
               prefix={<IdcardOutlined />}
-              placeholder="Enter your role or position"
+              placeholder="Masukkan jabatan atau posisi Anda"
             />
           </Form.Item>
 
           <Divider />
 
-          <Title level={4}>Visit Information</Title>
+          <Title level={4}>Informasi Kunjungan</Title>
 
           <Form.Item
-            label="Purpose of Visit"
+            label="Tujuan Kunjungan"
             name="purposeId"
             rules={[
               {
                 required: true,
-                message: "Please select the purpose of your visit",
+                message: "Silakan pilih tujuan kunjungan Anda",
               },
             ]}
           >
             <Select
-              placeholder="Select purpose of visit"
+              placeholder="Pilih tujuan kunjungan"
               onChange={handlePurposeChange}
             >
               {purposes.map((purpose) => (
@@ -376,25 +381,25 @@ const GuestForm = () => {
 
           {showCustomPurpose && (
             <Form.Item
-              label="Please specify your purpose"
+              label="Silakan sebutkan tujuan Anda"
               name="customPurpose"
               rules={[
-                { required: true, message: "Please specify your purpose" },
-                { max: 500, message: "Purpose must not exceed 500 characters" },
+                { required: true, message: "Silakan sebutkan tujuan Anda" },
+                { max: 500, message: "Tujuan maksimal 500 karakter" },
               ]}
             >
               <TextArea
                 rows={3}
-                placeholder="Please describe your specific purpose"
+                placeholder="Silakan jelaskan tujuan spesifik Anda"
                 showCount
                 maxLength={500}
               />
             </Form.Item>
           )}
 
-          <Form.Item label="Department" name="department">
+          <Form.Item label="Departemen" name="department">
             <Select
-              placeholder="Select department (optional)"
+              placeholder="Pilih departemen (opsional)"
               allowClear
               onChange={handleDepartmentChange}
             >
@@ -407,11 +412,14 @@ const GuestForm = () => {
           </Form.Item>
 
           <Form.Item
-            label="Person to Meet"
+            label="Orang yang Akan Ditemui"
             name="hostId"
-            help="Select the person you want to meet (optional)"
+            help="Pilih orang yang ingin Anda temui (opsional)"
           >
-            <Select placeholder="Select person to meet (optional)" allowClear>
+            <Select
+              placeholder="Pilih orang yang akan ditemui (opsional)"
+              allowClear
+            >
               {filteredHosts.map((host) => (
                 <Option key={host.id} value={host.id}>
                   <Space>
@@ -424,15 +432,13 @@ const GuestForm = () => {
           </Form.Item>
 
           <Form.Item
-            label="Additional Notes"
+            label="Catatan Tambahan"
             name="notes"
-            rules={[
-              { max: 1000, message: "Notes must not exceed 1000 characters" },
-            ]}
+            rules={[{ max: 1000, message: "Catatan maksimal 1000 karakter" }]}
           >
             <TextArea
               rows={3}
-              placeholder="Any additional information (optional)"
+              placeholder="Informasi tambahan (opsional)"
               showCount
               maxLength={1000}
             />
@@ -440,7 +446,7 @@ const GuestForm = () => {
 
           <Divider />
 
-          <Form.Item label="ID Photo" required>
+          <Form.Item label="Foto Identitas" required>
             <div className="photo-upload-container">
               {idPhotoUrl ? (
                 <div>
@@ -455,7 +461,7 @@ const GuestForm = () => {
                         icon={<CameraOutlined />}
                         onClick={() => setShowCamera(true)}
                       >
-                        Retake Photo
+                        Ulang
                       </Button>
                       <Upload
                         accept="image/*"
@@ -463,9 +469,7 @@ const GuestForm = () => {
                         beforeUpload={() => false}
                         onChange={handleFileUpload}
                       >
-                        <Button icon={<UploadOutlined />}>
-                          Upload Different Photo
-                        </Button>
+                        <Button icon={<UploadOutlined />}>Unggah Foto</Button>
                       </Upload>
                     </Space>
                   </div>
@@ -485,7 +489,7 @@ const GuestForm = () => {
                         icon={<CameraOutlined />}
                         onClick={() => setShowCamera(true)}
                       >
-                        Take Photo
+                        Ambil Foto
                       </Button>
                       <Upload
                         accept="image/*"
@@ -493,7 +497,7 @@ const GuestForm = () => {
                         beforeUpload={() => false}
                         onChange={handleFileUpload}
                       >
-                        <Button icon={<UploadOutlined />}>Upload Photo</Button>
+                        <Button icon={<UploadOutlined />}>Unggah Foto</Button>
                       </Upload>
                     </Space>
                   </div>
@@ -511,7 +515,7 @@ const GuestForm = () => {
               block
               style={{ height: "50px", fontSize: "16px" }}
             >
-              {loading ? "Registering..." : "Complete Registration"}
+              {loading ? "Mendaftar..." : "Selesaikan Registrasi"}
             </Button>
           </Form.Item>
         </Form>
@@ -534,9 +538,9 @@ const GuestForm = () => {
           }}
         >
           <Card
-            title="Capture ID Photo"
+            title="Ambil Foto Identitas"
             style={{ width: "90%", maxWidth: 500 }}
-            extra={<Button onClick={() => setShowCamera(false)}>Cancel</Button>}
+            extra={<Button onClick={() => setShowCamera(false)}>Batal</Button>}
           >
             <div className="webcam-container">
               <Webcam
@@ -562,7 +566,7 @@ const GuestForm = () => {
                   transform: "translateX(-50%)",
                 }}
               >
-                Capture Photo
+                Ambil Foto
               </Button>
             </div>
           </Card>
