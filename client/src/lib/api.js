@@ -49,13 +49,8 @@ export async function create(endpoint, payload) {
   return data;
 }
 
-export async function update(endpoint, id, payload) {
-  const { data } = await api.put(`${endpoint}/${id}`, payload);
-  return data;
-}
-
 export async function updateById(endpoint, id, payload) {
-  const { data } = await api.patch(`${endpoint}/${id}`, payload);
+  const { data } = await api.put(`${endpoint}/${id}`, payload);
   return data;
 }
 

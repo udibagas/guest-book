@@ -1,9 +1,10 @@
 import { create, deleteById, getAll, updateById } from "../lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message } from "antd";
+import { Form, message } from "antd";
 import { useState } from "react";
 
 export const useCrud = (endpoint) => {
+  const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingData, setEditingData] = useState(undefined);
@@ -25,6 +26,9 @@ export const useCrud = (endpoint) => {
     onSuccess: () => {
       message.success("Data created successfully");
       queryClient.invalidateQueries({ queryKey: [endpoint] });
+      setModalOpen(false);
+      setEditingData(undefined);
+      form.resetFields();
     },
     onError: (error) => {
       message.error(error.response?.data?.message || "Failed to create data");
@@ -36,6 +40,9 @@ export const useCrud = (endpoint) => {
     onSuccess: () => {
       message.success("Data updated successfully");
       queryClient.invalidateQueries({ queryKey: [endpoint] });
+      setModalOpen(false);
+      setEditingData(undefined);
+      form.resetFields();
     },
     onError: (error) => {
       message.error(error.response?.data?.message || "Failed to update user");
@@ -52,6 +59,14 @@ export const useCrud = (endpoint) => {
       message.error(error.response?.data?.message || "Failed to delete data");
     },
   });
+
+  const handleSubmit = async (values) => {
+    if (editingData) {
+      updateMutation.mutate({ id: editingData.id, data: values });
+    } else {
+      createMutation.mutate(values);
+    }
+  };
 
   const handleAdd = () => {
     setEditingData(null);
@@ -73,6 +88,7 @@ export const useCrud = (endpoint) => {
   };
 
   return {
+    form,
     createMutation,
     updateMutation,
     deleteMutation,
@@ -85,6 +101,7 @@ export const useCrud = (endpoint) => {
     handleAdd,
     handleEdit,
     handleDelete,
+    handleSubmit,
     handleModalClose,
     refreshData,
   };

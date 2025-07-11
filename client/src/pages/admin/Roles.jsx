@@ -24,6 +24,7 @@ const { Title } = Typography;
 
 const Roles = () => {
   const {
+    form,
     createMutation,
     updateMutation,
     modalOpen,
@@ -34,10 +35,10 @@ const Roles = () => {
     handleEdit,
     handleDelete,
     refreshData,
+    handleSubmit,
   } = useCrud("/roles");
 
   const { data: roles, isPending } = useFetch();
-  const [form] = Form.useForm();
 
   useEffect(() => {
     if (editingData) {
@@ -49,16 +50,6 @@ const Roles = () => {
       form.resetFields();
     }
   }, [editingData, form]);
-
-  const handleSubmit = async (values) => {
-    if (editingData) {
-      updateMutation.mutate({ id: editingData.id, data: values });
-    } else {
-      createMutation.mutate(values);
-    }
-
-    form.resetFields();
-  };
 
   const columns = [
     {

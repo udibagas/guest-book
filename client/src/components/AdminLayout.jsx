@@ -93,7 +93,7 @@ const AdminLayout = () => {
             level={collapsed ? 5 : 4}
             style={{ color: "white", margin: 0 }}
           >
-            {collapsed ? "MT" : "Mitrateknik"}
+            {collapsed ? "BT" : "Buku Tamu"}
           </Title>
         </div>
         <Menu
