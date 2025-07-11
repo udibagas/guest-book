@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import {
   Table,
   Card,
@@ -6,10 +5,9 @@ import {
   Button,
   Space,
   Typography,
-  message,
-  Popconfirm,
   Modal,
   Form,
+  Dropdown,
   Select,
 } from "antd";
 import {
@@ -17,110 +15,43 @@ import {
   EditOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  MoreOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
-import api from "../../api/axios";
+import { useCrud } from "../../hooks/useCrud";
+import { useEffect } from "react";
+import { useFetch } from "../../hooks/useFetch";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const Hosts = () => {
-  const [hosts, setHosts] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingHost, setEditingHost] = useState(null);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState("");
+  const {
+    form,
+    createMutation,
+    updateMutation,
+    modalOpen,
+    editingData,
+    useFetch: useFetchCrud,
+    setModalOpen,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    refreshData,
+    handleSubmit,
+  } = useCrud("/hosts");
 
-  const fetchHosts = async () => {
-    setLoading(true);
-    try {
-      const params = searchText ? { search: searchText } : {};
-      const { data } = await api.get("/api/hosts", { params });
-      setHosts(data);
-    } catch (error) {
-      console.error("Error fetching hosts:", error);
-      message.error("Gagal memuat data host");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDepartments = async () => {
-    try {
-      const { data } = await api.get("/api/departments");
-      setDepartments(data);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    }
-  };
-
-  const fetchRoles = async () => {
-    try {
-      const { data } = await api.get("/api/roles");
-      setRoles(data);
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
+  const { data: hosts, isPending } = useFetchCrud();
+  const { data: departments = [] } = useFetch("/departments");
+  const { data: roles = [] } = useFetch("/roles");
 
   useEffect(() => {
-    fetchHosts();
-    fetchDepartments();
-    fetchRoles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
-
-  const handleSearch = (value) => {
-    setSearchText(value);
-  };
-
-  const handleAdd = () => {
-    setEditingHost(null);
-    form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEdit = (host) => {
-    setEditingHost(host);
-    form.setFieldsValue({
-      name: host.name,
-      email: host.email,
-      phone: host.phone,
-      departmentId: host.departmentId,
-      roleId: host.roleId,
-    });
-    setModalVisible(true);
-  };
-
-  const handleDelete = async (hostId) => {
-    try {
-      await api.delete(`/api/hosts/${hostId}`);
-      message.success("Host berhasil dihapus");
-      fetchHosts();
-    } catch (error) {
-      console.error("Error deleting host:", error);
-      message.error("Gagal menghapus host");
+    if (editingData) {
+      form.setFieldsValue(editingData);
+    } else {
+      form.resetFields();
     }
-  };
-
-  const handleSubmit = async (values) => {
-    try {
-      if (editingHost) {
-        await api.put(`/api/hosts/${editingHost.id}`, values);
-        message.success("Host berhasil diperbarui");
-      } else {
-        await api.post("/api/hosts", values);
-        message.success("Host berhasil ditambahkan");
-      }
-      setModalVisible(false);
-      fetchHosts();
-    } catch (error) {
-      console.error("Error saving host:", error);
-      message.error("Gagal menyimpan host");
-    }
-  };
+  }, [editingData, form]);
 
   const columns = [
     {
@@ -136,98 +67,114 @@ const Hosts = () => {
     },
     {
       title: "Telepon",
-      dataIndex: "phone",
-      key: "phone",
-      render: (phone) => phone || "-",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      render: (phoneNumber) => phoneNumber || "-",
     },
     {
       title: "Departemen",
-      dataIndex: ["Department", "name"],
+      dataIndex: "department",
       key: "department",
       render: (departmentName) => departmentName || "-",
     },
     {
       title: "Jabatan",
-      dataIndex: ["Role", "name"],
+      dataIndex: "role",
       key: "role",
       render: (roleName) => roleName || "-",
     },
     {
-      title: "Aksi",
+      title: <SettingOutlined />,
       key: "actions",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-            title="Edit"
-          />
-          <Popconfirm
-            title="Apakah Anda yakin ingin menghapus host ini?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Ya"
-            cancelText="Tidak"
+      align: "center",
+      width: 60,
+      render: (_, record) => {
+        const menuItems = [
+          {
+            key: "edit",
+            label: "Edit",
+            icon: <EditOutlined />,
+            onClick: () => handleEdit(record),
+          },
+          {
+            key: "delete",
+            label: "Hapus",
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () => {
+              Modal.confirm({
+                title: "Hapus Role",
+                content: "Anda yakin akan menghapus role ini?",
+                okText: "Ya",
+                cancelText: "Tidak",
+                onOk: () => handleDelete(record.id),
+              });
+            },
+          },
+        ];
+
+        return (
+          <Dropdown
+            menu={{ items: menuItems }}
+            trigger={["click"]}
+            placement="bottomRight"
           >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              title="Hapus"
-            />
-          </Popconfirm>
-        </Space>
-      ),
+            <Button type="text" icon={<MoreOutlined />} size="small" />
+          </Dropdown>
+        );
+      },
     },
   ];
 
   return (
-    <div className="hosts-container">
+    <>
       <Card>
         <div className="page-header">
-          <Title level={2}>Manajemen Host</Title>
+          <Title level={3}>Kelola Host</Title>
           <Space>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            <Button
+              variant="solid"
+              color="default"
+              icon={<PlusOutlined />}
+              onClick={handleAdd}
+            >
               Tambah Host
             </Button>
             <Button
               icon={<ReloadOutlined />}
-              onClick={fetchHosts}
-              loading={loading}
+              onClick={refreshData}
+              loading={isPending}
             >
               Perbarui
             </Button>
           </Space>
         </div>
 
-        {/* Search */}
-        <div style={{ marginBottom: 16 }}>
-          <Input.Search
-            placeholder="Cari berdasarkan nama atau email"
-            allowClear
-            onSearch={handleSearch}
-            style={{ width: 300 }}
-            size="large"
-          />
-        </div>
-
         {/* Hosts Table */}
         <Table
+          size="middle"
           columns={columns}
           dataSource={hosts}
           rowKey="id"
-          loading={loading}
-          scroll={{ x: 800 }}
+          loading={isPending}
         />
       </Card>
 
       {/* Add/Edit Modal */}
       <Modal
-        title={editingHost ? "Edit Host" : "Tambah Host"}
-        open={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        footer={null}
-        width={600}
+        width={450}
+        title={editingData ? "Edit Host" : "Tambah Host"}
+        open={modalOpen}
+        cancelText="Batal"
+        onCancel={() => setModalOpen(false)}
+        afterClose={() => form.resetFields()}
+        onOk={() => form.submit()}
+        okText="Simpan"
+        okButtonProps={{
+          variant: "solid",
+          color: "default",
+          loading: createMutation.isPending || updateMutation.isPending,
+        }}
       >
         <Form
           form={form}
@@ -288,18 +235,9 @@ const Hosts = () => {
               ))}
             </Select>
           </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                {editingHost ? "Perbarui" : "Tambah"}
-              </Button>
-              <Button onClick={() => setModalVisible(false)}>Batal</Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 };
 
