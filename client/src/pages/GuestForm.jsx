@@ -247,7 +247,6 @@ const GuestForm = () => {
             label="Alamat Email"
             name="email"
             rules={[
-              { required: true, message: "Silakan masukkan alamat email Anda" },
               {
                 type: "email",
                 message: "Silakan masukkan alamat email yang valid",
@@ -280,17 +279,13 @@ const GuestForm = () => {
             label="Jabatan/Posisi"
             name="role"
             rules={[
-              {
-                required: true,
-                message: "Silakan masukkan jabatan atau posisi Anda",
-              },
               { min: 2, message: "Jabatan minimal 2 karakter" },
               { max: 100, message: "Jabatan maksimal 100 karakter" },
             ]}
           >
             <Input
               prefix={<IdcardOutlined />}
-              placeholder="Masukkan jabatan atau posisi Anda"
+              placeholder="Masukkan jabatan atau posisi Anda (opsional)"
             />
           </Form.Item>
 

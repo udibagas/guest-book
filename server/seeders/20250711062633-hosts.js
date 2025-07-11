@@ -6,8 +6,8 @@ module.exports = {
     await queryInterface.bulkInsert("hosts", [
       {
         name: "John Doe",
-        department_id: 1,
-        role_id: 1,
+        DepartmentId: 1,
+        RoleId: 1,
         email: "john.doe@mitrateknik.com",
         phoneNumber: "+62812345678",
         isActive: true,
@@ -16,8 +16,8 @@ module.exports = {
       },
       {
         name: "Jane Smith",
-        department_id: 2,
-        role_id: 2,
+        DepartmentId: 2,
+        RoleId: 2,
         email: "jane.smith@mitrateknik.com",
         phoneNumber: "+62812345679",
         isActive: true,
@@ -26,8 +26,8 @@ module.exports = {
       },
       {
         name: "Mike Johnson",
-        department_id: 3,
-        role_id: 3,
+        DepartmentId: 3,
+        RoleId: 3,
         email: "mike.johnson@mitrateknik.com",
         phoneNumber: "+62812345680",
         isActive: true,
@@ -36,8 +36,8 @@ module.exports = {
       },
       {
         name: "Sarah Wilson",
-        department_id: 4,
-        role_id: 4,
+        DepartmentId: 4,
+        RoleId: 4,
         email: "sarah.wilson@mitrateknik.com",
         phoneNumber: "+62812345681",
         isActive: true,
@@ -46,8 +46,8 @@ module.exports = {
       },
       {
         name: "David Brown",
-        department_id: 5,
-        role_id: 5,
+        DepartmentId: 5,
+        RoleId: 5,
         email: "david.brown@mitrateknik.com",
         phoneNumber: "+62812345682",
         isActive: true,

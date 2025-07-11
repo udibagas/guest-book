@@ -27,7 +27,7 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
-      department_id: {
+      DepartmentId: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -37,7 +37,7 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      role_id: {
+      RoleId: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -59,8 +59,8 @@ module.exports = {
 
     await queryInterface.addIndex("hosts", ["email"]);
     await queryInterface.addIndex("hosts", ["isActive"]);
-    await queryInterface.addIndex("hosts", ["department_id"]);
-    await queryInterface.addIndex("hosts", ["role_id"]);
+    await queryInterface.addIndex("hosts", ["DepartmentId"]);
+    await queryInterface.addIndex("hosts", ["RoleId"]);
   },
 
   async down(queryInterface, Sequelize) {

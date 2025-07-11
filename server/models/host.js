@@ -62,10 +62,10 @@ module.exports = (sequelize, DataTypes) => {
           fields: ["department"],
         },
         {
-          fields: ["department_id"],
+          fields: ["DepartmentId"],
         },
         {
-          fields: ["role_id"],
+          fields: ["RoleId"],
         },
         {
           fields: ["isActive"],
