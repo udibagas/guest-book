@@ -30,7 +30,7 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      purpose_id: {
+      PurposeId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -78,7 +78,7 @@ module.exports = {
 
     await queryInterface.addIndex("visits", ["GuestId"]);
     await queryInterface.addIndex("visits", ["HostId"]);
-    await queryInterface.addIndex("visits", ["purpose_id"]);
+    await queryInterface.addIndex("visits", ["PurposeId"]);
     await queryInterface.addIndex("visits", ["visitDate"]);
     await queryInterface.addIndex("visits", ["status"]);
     await queryInterface.addIndex("visits", ["checkInTime"]);

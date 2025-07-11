@@ -255,14 +255,7 @@ router.get("/:id", async (req, res) => {
         {
           model: Host,
           as: "Host",
-          attributes: [
-            "id",
-            "name",
-            "department",
-            "role",
-            "email",
-            "phoneNumber",
-          ],
+          attributes: ["id", "name", "email", "phoneNumber"],
         },
         {
           model: Purpose,
@@ -354,7 +347,7 @@ router.post("/", validateVisit, async (req, res) => {
         {
           model: Host,
           as: "Host",
-          attributes: ["id", "name", "department", "role"],
+          attributes: ["id", "name"],
         },
         {
           model: Purpose,
@@ -454,7 +447,7 @@ router.put("/:id", async (req, res) => {
         {
           model: Host,
           as: "Host",
-          attributes: ["id", "name", "department", "role"],
+          attributes: ["id", "name"],
         },
         {
           model: Purpose,

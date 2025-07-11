@@ -74,7 +74,7 @@ module.exports = (sequelize, DataTypes) => {
           fields: ["HostId"],
         },
         {
-          fields: ["purpose_id"],
+          fields: ["PurposeId"],
         },
         {
           fields: ["visitDate"],
