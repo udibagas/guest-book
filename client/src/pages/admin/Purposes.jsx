@@ -36,7 +36,7 @@ const Purposes = () => {
     handleDelete,
     refreshData,
     handleSubmit,
-  } = useCrud("/roles");
+  } = useCrud("/purposes");
 
   const { data: purposes, isPending } = useFetch();
 
