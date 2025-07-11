@@ -1,4 +1,4 @@
-import { Table, Card, Input, Button, Typography, Space } from "antd";
+import { Table, Card, Input, Button, Typography, Space, Image } from "antd";
 import {
   EditOutlined,
   ReloadOutlined,
@@ -23,11 +23,8 @@ const Guests = () => {
     setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
-  const handleTableChange = (pagination, filters, sorter) => {
+  const handleTableChange = (pagination) => {
     setPagination(pagination);
-    // Handle sorting and filtering if needed
-    // For example, you can use sorter to sort by a specific column
-    // and filters to filter by specific values
   };
 
   const {
@@ -36,7 +33,7 @@ const Guests = () => {
     refreshData,
   } = useCrud("/guests");
 
-  const { data, isPending } = useFetchCrud();
+  const { data, isPending } = useFetchCrud({ search: searchText });
 
   const columns = [
     {
@@ -136,7 +133,7 @@ const Guests = () => {
         <Table
           size="middle"
           columns={columns}
-          dataSource={data?.rows || []}
+          dataSource={data?.data?.rows || []}
           rowKey="id"
           loading={isPending}
           pagination={{

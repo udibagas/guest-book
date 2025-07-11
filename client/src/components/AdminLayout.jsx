@@ -80,13 +80,7 @@ const AdminLayout = () => {
 
   return (
     <Layout className="admin-layout">
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        className="admin-sidebar"
-        width={250}
-      >
+      <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="admin-logo">
           <Title
             level={collapsed ? 5 : 4}

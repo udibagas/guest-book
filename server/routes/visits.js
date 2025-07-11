@@ -1,6 +1,6 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
-const { Visit, Guest, Host, Purpose } = require("../models");
+const { Visit, Guest, Host, Purpose, Department } = require("../models");
 const { Op } = require("sequelize");
 const router = express.Router();
 
@@ -199,7 +199,14 @@ router.get("/stats", async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const [totalVisits, todayVisits, checkedInVisits] = await Promise.all([
+    const [
+      totalVisits,
+      todayVisits,
+      checkedInVisits,
+      totalGuests,
+      totalHosts,
+      totalDepartments,
+    ] = await Promise.all([
       Visit.count(),
       Visit.count({
         where: {
@@ -214,15 +221,18 @@ router.get("/stats", async (req, res) => {
           status: "checked_in",
         },
       }),
+      Guest.count(),
+      Host.count(),
+      Department.count(),
     ]);
 
     res.json({
-      success: true,
-      data: {
-        totalVisits,
-        todayVisits,
-        checkedInVisits,
-      },
+      totalVisits,
+      todayVisits,
+      checkedInVisits,
+      totalGuests,
+      totalHosts,
+      totalDepartments,
     });
   } catch (error) {
     console.error("Error fetching stats:", error);

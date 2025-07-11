@@ -1,73 +1,36 @@
-import { useState, useEffect } from "react";
+import { Card, Row, Col, Statistic, Typography, Button } from "antd";
 import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Typography,
-  DatePicker,
-  Button,
-  Space,
-} from "antd";
-import {
-  UserOutlined,
-  CheckCircleOutlined,
   ClockCircleOutlined,
-  TeamOutlined,
-  ApartmentOutlined,
   ReloadOutlined,
   CalendarOutlined,
+  UserSwitchOutlined,
+  // UserOutlined,
+  // TeamOutlined,
+  // ApartmentOutlined,
 } from "@ant-design/icons";
-import api from "../../lib/api";
+import { Link } from "react-router";
+import { useFetch } from "../../hooks/useFetch";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { Title } = Typography;
-const { RangePicker } = DatePicker;
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [dateRange, setDateRange] = useState(null);
-
-  const fetchStats = async () => {
-    setLoading(true);
-    try {
-      const params = {};
-      if (dateRange) {
-        params.startDate = dateRange[0].format("YYYY-MM-DD");
-        params.endDate = dateRange[1].format("YYYY-MM-DD");
-      }
-
-      const response = await api.get("/api/visits/stats", { params });
-      setStats(response.data.data);
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange]);
+  const queryClient = useQueryClient();
+  const { data: stats = {}, isPending: loading } = useFetch("/visits/stats");
 
   return (
     <Card>
       <div className="dashboard-header">
         <Title level={3}>Dashboard</Title>
-        <Space>
-          <RangePicker
-            onChange={setDateRange}
-            placeholder={["Tanggal Mulai", "Tanggal Akhir"]}
-          />
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={fetchStats}
-            loading={loading}
-          >
-            Perbarui
-          </Button>
-        </Space>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={() =>
+            queryClient.invalidateQueries({ queryKey: "/visits/stats" })
+          }
+          loading={loading}
+        >
+          Perbarui
+        </Button>
       </div>
 
       {/* Main Statistics */}
@@ -87,7 +50,7 @@ const Dashboard = () => {
             <Statistic
               title="Pengunjung Hari Ini"
               value={stats.todayVisits || 0}
-              prefix={<CheckCircleOutlined />}
+              prefix={<UserSwitchOutlined />}
               valueStyle={{ color: "#3f8600" }}
             />
           </Card>
@@ -105,7 +68,7 @@ const Dashboard = () => {
       </Row>
 
       {/* Secondary Statistics */}
-      <Row gutter={[24, 24]} className="stats-section">
+      {/* <Row gutter={[24, 24]} className="stats-section">
         <Col xs={24} sm={12} lg={8}>
           <Card className="stats-card">
             <Statistic
@@ -136,42 +99,17 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-      </Row>
+      </Row> */}
 
-      {/* Additional Info Cards */}
-      <Row gutter={[24, 24]} className="info-section">
-        <Col xs={24} lg={12}>
-          <Card
-            title="Aktivitas Terbaru"
-            className="activity-card"
-            extra={<a href="/admin/visits">Lihat Semua</a>}
-          >
-            <div style={{ textAlign: "center", padding: "20px" }}>
-              <p>Klik "Lihat Semua" untuk melihat daftar kunjungan terbaru</p>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Statistik Bulanan" className="monthly-stats-card">
-            <Row gutter={16}>
-              <Col span={12}>
-                <Statistic
-                  title="Bulan Ini"
-                  value={stats.monthlyVisits || 0}
-                  valueStyle={{ fontSize: "16px" }}
-                />
-              </Col>
-              <Col span={12}>
-                <Statistic
-                  title="Bulan Lalu"
-                  value={stats.lastMonthVisits || 0}
-                  valueStyle={{ fontSize: "16px" }}
-                />
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
+      <Card
+        title="Aktivitas Terbaru"
+        className="activity-card"
+        extra={<Link to="/admin/visits">Lihat Semua</Link>}
+      >
+        <div style={{ textAlign: "center", padding: "20px" }}>
+          <p>Klik "Lihat Semua" untuk melihat daftar kunjungan terbaru</p>
+        </div>
+      </Card>
     </Card>
   );
 };

@@ -41,7 +41,6 @@ const GuestForm = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [idPhoto, setIdPhoto] = useState(null);
   const [idPhotoUrl, setIdPhotoUrl] = useState(null);
-  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [showCustomPurpose, setShowCustomPurpose] = useState(false);
   const webcamRef = useRef(null);
   const navigate = useNavigate();
@@ -159,28 +158,24 @@ const GuestForm = () => {
             <Button type="primary" key="home" onClick={() => navigate("/")}>
               Kembali ke Beranda
             </Button>,
-            <Button
-              key="new"
-              onClick={() => {
-                setSubmitted(false);
-                form.resetFields();
-                setIdPhoto(null);
-                setIdPhotoUrl(null);
-                setSelectedDepartment(null);
-                setShowCustomPurpose(false);
-              }}
-            >
-              Daftarkan Tamu Lain
-            </Button>,
+            // <Button
+            //   type="primary"
+            //   key="new"
+            //   onClick={() => {
+            //     setSubmitted(false);
+            //     form.resetFields();
+            //     setIdPhoto(null);
+            //     setIdPhotoUrl(null);
+            //     setShowCustomPurpose(false);
+            //   }}
+            // >
+            //   Daftarkan Tamu Lain
+            // </Button>,
           ]}
         />
       </div>
     );
   }
-
-  const filteredHosts = selectedDepartment
-    ? hosts.filter((host) => host.department === selectedDepartment)
-    : hosts;
 
   return (
     <div className="guest-form-container">
@@ -344,7 +339,7 @@ const GuestForm = () => {
             ]}
           >
             <Select placeholder="Pilih orang yang akan ditemui" allowClear>
-              {filteredHosts.map((host) => (
+              {hosts.map((host) => (
                 <Option key={host.id} value={host.id}>
                   <Space>
                     <TeamOutlined />

@@ -1,10 +1,6 @@
 import { Typography, Button, Space, QRCode, Card, Row, Col } from "antd";
 import { useNavigate } from "react-router";
-import {
-  QrcodeOutlined,
-  FormOutlined,
-  SettingOutlined,
-} from "@ant-design/icons";
+import { QrcodeOutlined, FormOutlined } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
 
@@ -52,15 +48,6 @@ const Home = () => {
                   className="primary-btn"
                 >
                   Isi Formulir Tamu
-                </Button>
-
-                <Button
-                  size="large"
-                  icon={<SettingOutlined />}
-                  onClick={() => navigate("/login")}
-                  className="secondary-btn"
-                >
-                  Panel Admin
                 </Button>
               </Space>
             </Space>
