@@ -3,7 +3,6 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
-const { sequelize } = require("./models");
 const guestRoutes = require("./routes/guests");
 const visitRoutes = require("./routes/visits");
 const purposeRoutes = require("./routes/purposes");
@@ -34,22 +33,6 @@ app.get("/api/health", (req, res) => {
 });
 
 // Start server
-const startServer = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("Database connected successfully");
-
-    // Sync models
-    await sequelize.sync({ alter: true });
-    console.log("Database synced");
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Unable to start server:", error);
-    process.exit(1);
-  }
-};
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
