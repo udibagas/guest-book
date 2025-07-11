@@ -83,7 +83,7 @@ const GuestForm = () => {
           role: values.role,
           idPhotoPath: uploadResponse.data.data.filePath,
         },
-        purposeId: values.purposeId,
+        PurposeId: values.PurposeId,
         HostId: values.HostId || null,
         customPurpose: values.customPurpose || null,
         notes: values.notes || null,
@@ -300,7 +300,7 @@ const GuestForm = () => {
 
           <Form.Item
             label="Tujuan Kunjungan"
-            name="purposeId"
+            name="PurposeId"
             rules={[
               {
                 required: true,

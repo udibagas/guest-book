@@ -28,7 +28,7 @@ const validateVisit = [
     .isLength({ max: 100 })
     .withMessage("Company name must not exceed 100 characters"),
   body("guestData.idPhotoPath").notEmpty().withMessage("ID photo is required"),
-  body("purposeId").isInt().withMessage("Purpose ID must be a valid integer"),
+  body("PurposeId").isInt().withMessage("Purpose ID must be a valid integer"),
   body("HostId")
     .optional()
     .isInt()
@@ -56,7 +56,7 @@ router.get("/", async (req, res) => {
       endDate,
       search,
       HostId,
-      purposeId,
+      PurposeId,
     } = req.query;
 
     const offset = (page - 1) * limit;
@@ -74,8 +74,8 @@ router.get("/", async (req, res) => {
     }
 
     // Filter by purpose
-    if (purposeId) {
-      where.purposeId = purposeId;
+    if (PurposeId) {
+      where.PurposeId = PurposeId;
     }
 
     // Filter by date range
@@ -306,10 +306,10 @@ router.post("/", validateVisit, async (req, res) => {
       });
     }
 
-    const { guestData, purposeId, HostId, customPurpose, notes } = req.body;
+    const { guestData, PurposeId, HostId, customPurpose, notes } = req.body;
 
     // Verify purpose exists
-    const purpose = await Purpose.findByPk(purposeId);
+    const purpose = await Purpose.findByPk(PurposeId);
     if (!purpose) {
       return res.status(400).json({
         success: false,
@@ -334,7 +334,7 @@ router.post("/", validateVisit, async (req, res) => {
     // Create visit
     const visit = await Visit.create({
       guestId: guest.id,
-      purposeId,
+      PurposeId,
       HostId: HostId || null,
       customPurpose: customPurpose || null,
       notes: notes || null,
