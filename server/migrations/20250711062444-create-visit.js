@@ -10,7 +10,7 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      guest_id: {
+      GuestId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
@@ -20,7 +20,7 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      host_id: {
+      HostId: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -76,8 +76,8 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex("visits", ["guest_id"]);
-    await queryInterface.addIndex("visits", ["host_id"]);
+    await queryInterface.addIndex("visits", ["GuestId"]);
+    await queryInterface.addIndex("visits", ["HostId"]);
     await queryInterface.addIndex("visits", ["purpose_id"]);
     await queryInterface.addIndex("visits", ["visitDate"]);
     await queryInterface.addIndex("visits", ["status"]);

@@ -330,10 +330,11 @@ router.post("/", validateVisit, async (req, res) => {
 
     // Create or update guest
     const guest = await Guest.findOrCreateGuest(guestData);
+    console.log("Guest found or created:", guest);
 
     // Create visit
     const visit = await Visit.create({
-      guestId: guest.id,
+      GuestId: guest.id,
       PurposeId,
       HostId: HostId || null,
       customPurpose: customPurpose || null,

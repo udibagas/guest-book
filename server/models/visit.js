@@ -68,10 +68,10 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "visits",
       indexes: [
         {
-          fields: ["guest_id"],
+          fields: ["GuestId"],
         },
         {
-          fields: ["host_id"],
+          fields: ["HostId"],
         },
         {
           fields: ["purpose_id"],
