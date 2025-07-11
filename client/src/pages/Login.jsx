@@ -16,7 +16,7 @@ const Login = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const { data } = await api.post("/api/auth/login", values);
+      const { data } = await api.post("/auth/login", values);
 
       const { token, user } = data;
 

@@ -89,7 +89,6 @@ body {
   padding: 0 32px !important;
   font-size: 16px !important;
   font-weight: 500 !important;
-  border-radius: 12px !important;
   background: linear-gradient(45deg, #1890ff, #52c41a) !important;
   border: none !important;
   box-shadow: 0 4px 15px rgba(24, 144, 255, 0.4) !important;
@@ -106,7 +105,6 @@ body {
   padding: 0 32px !important;
   font-size: 16px !important;
   font-weight: 500 !important;
-  border-radius: 12px !important;
   background: rgba(255, 255, 255, 0.1) !important;
   border: 2px solid rgba(255, 255, 255, 0.3) !important;
   color: white !important;
@@ -200,7 +198,7 @@ body {
   text-align: center;
   padding: 20px;
   border: 2px dashed #d9d9d9;
-  border-radius: 8px;
+  border-radius: 4px;
   background: #fafafa;
   transition: all 0.3s ease;
 }
@@ -213,13 +211,13 @@ body {
 .photo-preview {
   max-width: 200px;
   max-height: 200px;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .webcam-container {
   position: relative;
-  border-radius: 8px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -232,13 +230,6 @@ body {
   min-height: 100vh;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.admin-container .ant-card {
-  border-radius: 16px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-  border: none !important;
-  backdrop-filter: blur(10px);
 }
 
 .admin-header-card {
@@ -262,43 +253,12 @@ body {
   color: #1e40af !important;
 }
 
-.refresh-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  border: none !important;
-  color: white !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.refresh-button:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-}
-
-.logout-button {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-  border: none !important;
-  color: white !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.logout-button:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
-}
-
 .stats-section {
   margin-bottom: 24px;
 }
 
 .stats-card {
   background: rgba(255, 255, 255, 0.95) !important;
-  border-radius: 16px !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
   transition: all 0.3s ease !important;
@@ -315,14 +275,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   border-radius: 16px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-}
-
-.filter-card .ant-input-search,
-.filter-card .ant-select,
-.filter-card .ant-picker {
-  border-radius: 8px !important;
-  border: 2px solid #e5e7eb !important;
-  transition: all 0.3s ease !important;
 }
 
 .filter-card .ant-input-search:focus-within,
@@ -467,6 +419,120 @@ body {
 .login-footer-text {
   font-size: 12px !important;
   color: #9ca3af !important;
+}
+
+/* Admin Layout Styles */
+.admin-layout {
+  min-height: 100vh;
+}
+
+.admin-logo {
+  padding: 16px 24px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+}
+
+.admin-header {
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  padding: 0 24px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.admin-trigger {
+  color: #666 !important;
+  padding: 8px !important;
+  border-radius: 4px !important;
+  transition: all 0.3s ease !important;
+}
+
+.admin-trigger:hover {
+  background: #f0f0f0 !important;
+  color: #1890ff !important;
+}
+
+.admin-user-info {
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.admin-user-info:hover {
+  background: #f0f0f0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.dashboard-header h2 {
+  margin: 0 !important;
+  color: #1e3a8a !important;
+}
+
+.stats-section {
+  margin-bottom: 24px;
+}
+
+.info-section {
+  margin-top: 24px;
+}
+
+.stats-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease !important;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.activity-card,
+.monthly-stats-card {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.filter-card {
+  background: #fafbfc !important;
+  border: 1px solid #e8e8e8 !important;
+  border-radius: 12px !important;
+}
+
+.table-card {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Responsive Design */
@@ -622,35 +688,6 @@ body {
 
 .footer-section {
   animation-delay: 0.4s;
-}
-
-/* Form field improvements */
-.ant-form-item-label > label {
-  font-weight: 500;
-  color: #262626;
-}
-
-.ant-input,
-.ant-select-selector,
-.ant-input-number,
-.ant-picker {
-  border-radius: 8px !important;
-  border-color: #d9d9d9;
-  transition: all 0.3s ease;
-}
-
-.ant-input:focus,
-.ant-select-focused .ant-select-selector,
-.ant-input-number-focused,
-.ant-picker-focused {
-  border-color: #1890ff !important;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
-}
-
-.ant-btn {
-  border-radius: 8px !important;
-  font-weight: 500;
-  transition: all 0.3s ease;
 }
 
 .ant-btn-primary {

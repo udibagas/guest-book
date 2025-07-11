@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   Form,
   Input,
@@ -28,6 +28,7 @@ import {
 import { useNavigate } from "react-router";
 import Webcam from "react-webcam";
 import api from "../api/axios";
+import { useFetch } from "../hooks/useFetch";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -40,73 +41,17 @@ const GuestForm = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [idPhoto, setIdPhoto] = useState(null);
   const [idPhotoUrl, setIdPhotoUrl] = useState(null);
-  const [purposes, setPurposes] = useState([]);
-  const [hosts, setHosts] = useState([]);
-  const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [showCustomPurpose, setShowCustomPurpose] = useState(false);
   const webcamRef = useRef(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchPurposes();
-    fetchHosts();
-    fetchDepartments();
-  }, []);
-
-  const fetchPurposes = async () => {
-    try {
-      const response = await api.get("/api/purposes");
-      setPurposes(response.data.data);
-    } catch (error) {
-      console.error("Error fetching purposes:", error);
-      message.error("Gagal memuat data tujuan kunjungan");
-    }
-  };
-
-  const fetchHosts = async () => {
-    try {
-      const response = await api.get("/api/hosts");
-      setHosts(response.data.data);
-    } catch (error) {
-      console.error("Error fetching hosts:", error);
-      message.error("Gagal memuat data host");
-    }
-  };
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await api.get("/api/hosts/departments");
-      setDepartments(response.data.data);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    }
-  };
-
-  const fetchHostsByDepartment = async (department) => {
-    try {
-      const response = await api.get(
-        `/api/hosts?department=${encodeURIComponent(department)}`
-      );
-      setHosts(response.data.data);
-    } catch (error) {
-      console.error("Error fetching hosts by department:", error);
-    }
-  };
+  const { data: purposes = [] } = useFetch("/purposes");
+  const { data: hosts = [] } = useFetch("/hosts");
 
   const handlePurposeChange = (value) => {
     const purpose = purposes.find((p) => p.id === value);
     setShowCustomPurpose(purpose && purpose.name === "Other");
-  };
-
-  const handleDepartmentChange = (value) => {
-    setSelectedDepartment(value);
-    form.setFieldValue("hostId", undefined); // Clear host selection
-    if (value) {
-      fetchHostsByDepartment(value);
-    } else {
-      fetchHosts(); // Fetch all hosts if no department selected
-    }
   };
 
   const handleSubmit = async (values) => {
@@ -146,7 +91,7 @@ const GuestForm = () => {
 
       await api.post("/api/visits", visitData);
 
-      message.success("Registration successful! Welcome to Mitrateknik.");
+      message.success("Registrasi berhasil! Selamat datang!");
       setSubmitted(true);
     } catch (error) {
       console.error("Registration error:", error);
@@ -252,7 +197,6 @@ const GuestForm = () => {
             </Title>
           </Space>
         }
-        bordered={false}
       >
         <Form
           form={form}
@@ -397,29 +341,14 @@ const GuestForm = () => {
             </Form.Item>
           )}
 
-          <Form.Item label="Departemen" name="department">
-            <Select
-              placeholder="Pilih departemen (opsional)"
-              allowClear
-              onChange={handleDepartmentChange}
-            >
-              {departments.map((dept) => (
-                <Option key={dept} value={dept}>
-                  {dept}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
           <Form.Item
             label="Orang yang Akan Ditemui"
             name="hostId"
-            help="Pilih orang yang ingin Anda temui (opsional)"
+            rules={[
+              { required: true, message: "Pilih orang yang akan ditemui" },
+            ]}
           >
-            <Select
-              placeholder="Pilih orang yang akan ditemui (opsional)"
-              allowClear
-            >
+            <Select placeholder="Pilih orang yang akan ditemui" allowClear>
               {filteredHosts.map((host) => (
                 <Option key={host.id} value={host.id}>
                   <Space>

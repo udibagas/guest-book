@@ -9,7 +9,6 @@ import {
   Typography,
   Row,
   Col,
-  Statistic,
   DatePicker,
   Select,
   Modal,
@@ -19,28 +18,21 @@ import {
   Descriptions,
 } from "antd";
 import {
-  SearchOutlined,
-  ReloadOutlined,
   EyeOutlined,
   LogoutOutlined,
   DeleteOutlined,
-  ArrowLeftOutlined,
-  UserOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router";
-import api from "../api/axios";
+import api from "../../api/axios";
 import dayjs from "dayjs";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const Admin = () => {
+const Visits = () => {
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({});
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -53,8 +45,6 @@ const Admin = () => {
   });
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const navigate = useNavigate();
 
   const fetchVisits = async () => {
     setLoading(true);
@@ -85,18 +75,8 @@ const Admin = () => {
     }
   };
 
-  const fetchStats = async () => {
-    try {
-      const response = await api.get("/api/visits/stats");
-      setStats(response.data.data);
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    }
-  };
-
   useEffect(() => {
     fetchVisits();
-    fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.current, pagination.pageSize, filters]);
 
@@ -124,7 +104,6 @@ const Admin = () => {
       await api.put(`/api/visits/${visitId}/checkout`);
       message.success("Tamu berhasil check out");
       fetchVisits();
-      fetchStats();
     } catch (error) {
       console.error("Error checking out visit:", error);
       message.error("Gagal check out tamu");
@@ -136,7 +115,6 @@ const Admin = () => {
       await api.delete(`/api/visits/${visitId}`);
       message.success("Catatan kunjungan berhasil dihapus");
       fetchVisits();
-      fetchStats();
     } catch (error) {
       console.error("Error deleting visit:", error);
       message.error("Gagal menghapus catatan kunjungan");
@@ -152,12 +130,6 @@ const Admin = () => {
       console.error("Error fetching visit details:", error);
       message.error("Gagal memuat detail kunjungan");
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUser");
-    navigate("/");
   };
 
   const columns = [
@@ -243,81 +215,22 @@ const Admin = () => {
   ];
 
   return (
-    <div className="admin-container">
-      <Card
-        className="admin-header-card"
-        title={
-          <Space>
-            <Button
-              type="text"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/")}
-              className="back-button"
-            />
-            <Title level={2} style={{ margin: 0, color: "#1e3a8a" }}>
-              Dashboard Admin
-            </Title>
-          </Space>
-        }
-        extra={
-          <Space>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                fetchVisits();
-                fetchStats();
-              }}
-              className="refresh-button"
-            >
-              Perbarui
-            </Button>
-            <Button
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              className="logout-button"
-            >
-              Keluar
-            </Button>
-          </Space>
-        }
-      >
-        {/* Statistics */}
-        <Row gutter={[16, 16]} className="stats-section">
-          <Col xs={24} sm={8}>
-            <Card className="stats-card">
-              <Statistic
-                title="Total Kunjungan"
-                value={stats.totalVisits || 0}
-                prefix={<UserOutlined />}
-                valueStyle={{ color: "#1e3a8a", fontWeight: "bold" }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Card className="stats-card">
-              <Statistic
-                title="Pengunjung Hari Ini"
-                value={stats.todayVisits || 0}
-                prefix={<CheckCircleOutlined />}
-                valueStyle={{ color: "#3f8600", fontWeight: "bold" }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Card className="stats-card">
-              <Statistic
-                title="Sedang Check In"
-                value={stats.checkedInVisits || 0}
-                prefix={<ClockCircleOutlined />}
-                valueStyle={{ color: "#1890ff", fontWeight: "bold" }}
-              />
-            </Card>
-          </Col>
-        </Row>
+    <>
+      <Card>
+        <div className="page-header">
+          <Title level={2}>Manajemen Kunjungan</Title>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={fetchVisits}
+            loading={loading}
+          >
+            Perbarui
+          </Button>
+        </div>
 
         {/* Filters */}
         <Card className="filter-card" style={{ marginBottom: 16 }}>
-          <Title level={4} style={{ marginBottom: 16, color: "#1e3a8a" }}>
+          <Title level={4} style={{ marginBottom: 16 }}>
             Filter Data
           </Title>
           <Row gutter={[16, 16]}>
@@ -354,26 +267,21 @@ const Admin = () => {
         </Card>
 
         {/* Visit Table */}
-        <Card className="table-card">
-          <Title level={4} style={{ marginBottom: 16, color: "#1e3a8a" }}>
-            Daftar Kunjungan
-          </Title>
-          <Table
-            columns={columns}
-            dataSource={visits}
-            rowKey="id"
-            loading={loading}
-            pagination={{
-              ...pagination,
-              showSizeChanger: true,
-              showQuickJumper: true,
-              showTotal: (total, range) =>
-                `${range[0]}-${range[1]} dari ${total} kunjungan`,
-            }}
-            onChange={handleTableChange}
-            scroll={{ x: 800 }}
-          />
-        </Card>
+        <Table
+          columns={columns}
+          dataSource={visits}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} dari ${total} kunjungan`,
+          }}
+          onChange={handleTableChange}
+          scroll={{ x: 800 }}
+        />
       </Card>
 
       {/* Visit Details Modal */}
@@ -507,8 +415,8 @@ const Admin = () => {
           </div>
         )}
       </Modal>
-    </div>
+    </>
   );
 };
 
-export default Admin;
+export default Visits;

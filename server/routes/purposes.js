@@ -21,10 +21,7 @@ const validatePurpose = [
 router.get("/", async (req, res) => {
   try {
     const purposes = await Purpose.getActivePurposes();
-    res.json({
-      success: true,
-      data: purposes,
-    });
+    res.json(purposes);
   } catch (error) {
     console.error("Error fetching purposes:", error);
     res.status(500).json({

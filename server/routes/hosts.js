@@ -57,10 +57,7 @@ router.get("/", async (req, res) => {
       order: [["name", "ASC"]],
     });
 
-    res.json({
-      success: true,
-      data: hosts,
-    });
+    res.json(hosts);
   } catch (error) {
     console.error("Error fetching hosts:", error);
     res.status(500).json({
