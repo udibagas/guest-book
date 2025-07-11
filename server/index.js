@@ -11,6 +11,7 @@ const uploadRoutes = require("./routes/upload");
 const authRoutes = require("./routes/auth");
 const departmentRoutes = require("./routes/departments");
 const roleRoutes = require("./routes/roles");
+const userRoutes = require("./routes/users");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ app.use("/api/purposes", purposeRoutes);
 app.use("/api/hosts", hostRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/upload", uploadRoutes);
 
 // Health check

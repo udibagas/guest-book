@@ -27,42 +27,10 @@ const Guests = () => {
     setPagination(pagination);
   };
 
-  const {
-    useFetch: useFetchCrud,
-    handleEdit,
-    refreshData,
-  } = useCrud("/guests");
-
+  const { useFetch: useFetchCrud, refreshData } = useCrud("/guests");
   const { data, isPending } = useFetchCrud({ search: searchText });
 
   const columns = [
-    {
-      title: "Foto",
-      dataIndex: "idPhotoPath",
-      key: "photo",
-      width: 80,
-      render: (photoPath) =>
-        photoPath ? (
-          <Image
-            src={`${
-              import.meta.env.VITE_API_URL || "http://localhost:5001"
-            }${photoPath}`}
-            alt="ID Photo"
-            width={50}
-            height={50}
-            style={{ objectFit: "cover", borderRadius: 4 }}
-          />
-        ) : (
-          <div
-            style={{
-              width: 50,
-              height: 50,
-              backgroundColor: "#f0f0f0",
-              borderRadius: 4,
-            }}
-          />
-        ),
-    },
     {
       title: "Nama",
       dataIndex: "name",
@@ -89,21 +57,6 @@ const Guests = () => {
       title: "Jabatan",
       dataIndex: "role",
       key: "role",
-    },
-    {
-      title: <SettingOutlined />,
-      align: "center",
-      width: 60,
-      fixed: "right",
-      key: "actions",
-      render: (_, record) => (
-        <Button
-          type="text"
-          icon={<EditOutlined />}
-          title="Edit"
-          onClick={() => handleEdit(record)}
-        />
-      ),
     },
   ];
 

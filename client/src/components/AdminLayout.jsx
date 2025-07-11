@@ -10,6 +10,7 @@ import {
   CalendarOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
+  UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate, useLocation } from "react-router";
 
@@ -64,6 +65,11 @@ const AdminLayout = () => {
       key: "/admin/purposes",
       icon: <AimOutlined />,
       label: "Tujuan",
+    },
+    {
+      key: "/admin/users",
+      icon: <UsergroupAddOutlined />,
+      label: "Pengguna",
     },
   ];
 

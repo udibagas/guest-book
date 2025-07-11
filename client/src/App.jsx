@@ -15,6 +15,7 @@ const Hosts = lazy(() => import("./pages/admin/Hosts"));
 const Departments = lazy(() => import("./pages/admin/Departments"));
 const Roles = lazy(() => import("./pages/admin/Roles"));
 const Purposes = lazy(() => import("./pages/admin/Purposes"));
+const Users = lazy(() => import("./pages/admin/Users"));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -46,6 +47,7 @@ function App() {
               <Route path="departments" element={<Departments />} />
               <Route path="roles" element={<Roles />} />
               <Route path="purposes" element={<Purposes />} />
+              <Route path="users" element={<Users />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
