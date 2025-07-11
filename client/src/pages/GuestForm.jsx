@@ -22,7 +22,6 @@ import {
   CameraOutlined,
   UploadOutlined,
   ArrowLeftOutlined,
-  TeamOutlined,
   AimOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
@@ -32,7 +31,6 @@ import { useFetch } from "../hooks/useFetch";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
-const { Option } = Select;
 
 const GuestForm = () => {
   const [form] = Form.useForm();
@@ -299,18 +297,21 @@ const GuestForm = () => {
             ]}
           >
             <Select
+              showSearch
+              optionFilterProp="text"
               placeholder="Pilih tujuan kunjungan"
               onChange={handlePurposeChange}
-            >
-              {purposes.map((purpose) => (
-                <Option key={purpose.id} value={purpose.id}>
-                  <Space>
-                    <AimOutlined />
-                    {purpose.name}
-                  </Space>
-                </Option>
-              ))}
-            </Select>
+              options={purposes.map((purpose) => ({
+                text: purpose.name,
+                label: (
+                  <>
+                    {" "}
+                    <AimOutlined /> {purpose.name}
+                  </>
+                ),
+                value: purpose.id,
+              }))}
+            />
           </Form.Item>
 
           {showCustomPurpose && (
@@ -338,16 +339,31 @@ const GuestForm = () => {
               { required: true, message: "Pilih orang yang akan ditemui" },
             ]}
           >
-            <Select placeholder="Pilih orang yang akan ditemui" allowClear>
-              {hosts.map((host) => (
-                <Option key={host.id} value={host.id}>
-                  <Space>
-                    <TeamOutlined />
-                    {host.name} - {host.role}
-                  </Space>
-                </Option>
-              ))}
-            </Select>
+            <Select
+              showSearch
+              optionFilterProp="text"
+              placeholder="Pilih orang yang akan ditemui"
+              allowClear
+              options={hosts.map((host) => ({
+                text: host.name,
+                label: (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      <UserOutlined /> {host.name}{" "}
+                      <i style={{ color: "#999" }}>{host.Role.name}</i>
+                    </div>
+                    {host.Department.name}
+                  </div>
+                ),
+                value: host.id,
+              }))}
+            />
           </Form.Item>
 
           <Form.Item
