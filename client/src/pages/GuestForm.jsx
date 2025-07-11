@@ -67,7 +67,7 @@ const GuestForm = () => {
       const formData = new FormData();
       formData.append("idPhoto", idPhoto);
 
-      const uploadResponse = await api.post("/api/upload/id-photo", formData, {
+      const uploadResponse = await api.post("/upload/id-photo", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -89,7 +89,7 @@ const GuestForm = () => {
         notes: values.notes || null,
       };
 
-      await api.post("/api/visits", visitData);
+      await api.post("/visits", visitData);
 
       message.success("Registrasi berhasil! Selamat datang!");
       setSubmitted(true);
