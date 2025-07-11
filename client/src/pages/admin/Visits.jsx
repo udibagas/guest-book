@@ -348,9 +348,9 @@ const Visits = () => {
               <Title level={5}>Foto Identitas:</Title>
               {selectedVisit.Guest?.idPhotoPath && (
                 <Image
-                  src={`${
-                    import.meta.env.VITE_API_URL || "http://localhost:3001"
-                  }${selectedVisit.Guest.idPhotoPath}`}
+                  src={`${import.meta.env.VITE_API_URL || ""}${
+                    selectedVisit.Guest.idPhotoPath
+                  }`}
                   alt="Identitas Tamu"
                   style={{ maxWidth: "100%", maxHeight: 300 }}
                 />

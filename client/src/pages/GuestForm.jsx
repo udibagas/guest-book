@@ -527,7 +527,6 @@ const GuestForm = () => {
             {currentStep === steps.length - 1 && (
               <Button
                 type="primary"
-                htmlType="submit"
                 loading={loading}
                 size="large"
                 onClick={async () => {
@@ -544,8 +543,8 @@ const GuestForm = () => {
                     }
                     await form.validateFields(requiredFields);
 
-                    // If validation passes, submit the form
-                    form.submit();
+                    // If validation passes, submit the form manually
+                    handleSubmit();
                   } catch {
                     message.error(
                       "Silakan lengkapi semua field yang wajib diisi"
