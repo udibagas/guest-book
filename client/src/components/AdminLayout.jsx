@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Layout, Menu, Avatar, Dropdown, Space, Typography } from "antd";
 import {
   DashboardOutlined,
@@ -10,7 +10,6 @@ import {
   CalendarOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate, useLocation } from "react-router";
 

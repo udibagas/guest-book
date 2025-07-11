@@ -38,6 +38,9 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
+// SPA
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
