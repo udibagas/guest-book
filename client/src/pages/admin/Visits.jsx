@@ -163,7 +163,7 @@ const Visits = () => {
 
   return (
     <>
-      <Card>
+      <Card style={{ minHeight: "calc(100vh - 100px)" }}>
         <div className="page-header">
           <Title level={3}>Kelola Kunjungan</Title>
           <Button
