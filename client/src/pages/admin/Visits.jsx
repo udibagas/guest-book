@@ -7,8 +7,6 @@ import {
   Space,
   Tag,
   Typography,
-  Row,
-  Col,
   DatePicker,
   Select,
   Modal,
@@ -20,6 +18,7 @@ import { EyeOutlined, LogoutOutlined, ReloadOutlined } from "@ant-design/icons";
 import api from "../../lib/api";
 import dayjs from "dayjs";
 import { useCrud } from "../../hooks/useCrud";
+import { useMemo } from "react";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -47,11 +46,20 @@ const Visits = () => {
     queryClient,
   } = useCrud("/visits");
 
-  const { data, isPending } = useFetchCrud();
+  const params = useMemo(() => {
+    const params = {
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...filters,
+    };
+    if (filters.dateRange) {
+      params.startDate = filters.dateRange[0].format("YYYY-MM-DD");
+      params.endDate = filters.dateRange[1].format("YYYY-MM-DD");
+    }
+    return params;
+  }, [pagination, filters]);
 
-  const handleTableChange = (newPagination) => {
-    setPagination(newPagination);
-  };
+  const { data, isPending } = useFetchCrud(params);
 
   const handleSearch = (value) => {
     setFilters((prev) => ({ ...prev, search: value }));
@@ -95,12 +103,6 @@ const Visits = () => {
       title: "Nama Tamu",
       dataIndex: ["Guest", "name"],
       key: "guestName",
-      sorter: true,
-    },
-    {
-      title: "Email",
-      dataIndex: ["Guest", "email"],
-      key: "guestEmail",
     },
     {
       title: "Perusahaan",
@@ -114,7 +116,7 @@ const Visits = () => {
       key: "purposeName",
     },
     {
-      title: "Host",
+      title: "PIC",
       dataIndex: ["Host", "name"],
       key: "hostName",
       render: (hostName) => hostName || "-",
@@ -174,38 +176,30 @@ const Visits = () => {
         </div>
 
         {/* Filters */}
-        <Card style={{ marginBottom: 16 }}>
-          <Title level={4} style={{ marginBottom: 16 }}>
-            Filter Data
-          </Title>
-          <Row gutter={[16, 16]}>
-            <Col xs={24} sm={8}>
-              <Input.Search
-                placeholder="Cari berdasarkan nama, email, atau perusahaan"
-                allowClear
-                onSearch={handleSearch}
-                style={{ width: "100%" }}
-              />
-            </Col>
-            <Col xs={24} sm={6}>
-              <Select
-                placeholder="Filter berdasarkan status"
-                allowClear
-                style={{ width: "100%" }}
-                onChange={handleStatusFilter}
-              >
-                <Option value="checked_in">Sudah Masuk</Option>
-                <Option value="checked_out">Sudah Keluar</Option>
-              </Select>
-            </Col>
-            <Col xs={24} sm={10}>
-              <RangePicker
-                style={{ width: "100%" }}
-                onChange={handleDateFilter}
-                placeholder={["Tanggal Mulai", "Tanggal Akhir"]}
-              />
-            </Col>
-          </Row>
+        <Card style={{ marginBottom: 20, backgroundColor: "#f0f2f5" }}>
+          <Space>
+            <strong>Filter:</strong>
+            <Input.Search
+              placeholder="Cari berdasarkan nama, email, atau perusahaan"
+              allowClear
+              onSearch={handleSearch}
+              style={{ width: 400 }}
+            />
+            <Select
+              placeholder="Filter berdasarkan status"
+              allowClear
+              style={{ width: 220 }}
+              onChange={handleStatusFilter}
+            >
+              <Option value="checked_in">Sudah Masuk</Option>
+              <Option value="checked_out">Sudah Keluar</Option>
+            </Select>
+            <RangePicker
+              style={{ width: "100%" }}
+              onChange={handleDateFilter}
+              placeholder={["Tanggal Mulai", "Tanggal Akhir"]}
+            />
+          </Space>
         </Card>
 
         {/* Visit Table */}
@@ -215,6 +209,10 @@ const Visits = () => {
           dataSource={data?.data?.rows || []}
           rowKey="id"
           loading={isPending}
+          onRow={(record) => ({
+            onDoubleClick: () => showVisitDetails(record.id),
+            style: { cursor: "pointer" },
+          })}
           pagination={{
             ...pagination,
             showSizeChanger: true,
@@ -222,7 +220,7 @@ const Visits = () => {
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} dari ${total} kunjungan`,
           }}
-          onChange={handleTableChange}
+          onChange={(pagination) => setPagination(pagination)}
         />
       </Card>
 
@@ -254,9 +252,10 @@ const Visits = () => {
         {selectedVisit && (
           <div>
             <Descriptions
+              size="small"
               title="Informasi Tamu"
               bordered
-              column={2}
+              column={1}
               style={{ marginBottom: 24 }}
             >
               <Descriptions.Item label="Nama">
@@ -277,15 +276,16 @@ const Visits = () => {
             </Descriptions>
 
             <Descriptions
+              size="small"
               title="Informasi Kunjungan"
               bordered
-              column={2}
+              column={1}
               style={{ marginBottom: 24 }}
             >
               <Descriptions.Item label="Tujuan">
                 {selectedVisit.Purpose?.name}
               </Descriptions.Item>
-              <Descriptions.Item label="Host">
+              <Descriptions.Item label="PIC">
                 {selectedVisit.Host?.name || "Tidak ada"}
               </Descriptions.Item>
               <Descriptions.Item label="Departemen">

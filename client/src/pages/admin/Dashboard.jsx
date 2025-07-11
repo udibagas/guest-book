@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router";
 import { useFetch } from "../../hooks/useFetch";
 import { useQueryClient } from "@tanstack/react-query";
+import VisitTable from "../../components/VisitTable";
 
 const { Title } = Typography;
 
@@ -82,7 +83,7 @@ const Dashboard = () => {
         <Col xs={24} sm={12} lg={8}>
           <Card className="stats-card">
             <Statistic
-              title="Total Host"
+              title="Total PIC"
               value={stats.totalHosts || 0}
               prefix={<TeamOutlined />}
               valueStyle={{ color: "#eb2f96" }}
@@ -106,9 +107,7 @@ const Dashboard = () => {
         className="activity-card"
         extra={<Link to="/admin/visits">Lihat Semua</Link>}
       >
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <p>Klik "Lihat Semua" untuk melihat daftar kunjungan terbaru</p>
-        </div>
+        <VisitTable />
       </Card>
     </Card>
   );

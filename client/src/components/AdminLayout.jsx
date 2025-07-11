@@ -48,7 +48,7 @@ const AdminLayout = () => {
     {
       key: "/admin/hosts",
       icon: <TeamOutlined />,
-      label: "Host",
+      label: "PIC",
     },
     {
       key: "/admin/departments",

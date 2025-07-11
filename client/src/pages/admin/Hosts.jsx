@@ -130,7 +130,7 @@ const Hosts = () => {
     <>
       <Card>
         <div className="page-header">
-          <Title level={3}>Kelola Host</Title>
+          <Title level={3}>Kelola PIC</Title>
           <Space>
             <Button
               variant="solid"
@@ -138,7 +138,7 @@ const Hosts = () => {
               icon={<PlusOutlined />}
               onClick={handleAdd}
             >
-              Tambah Host
+              Tambah PIC
             </Button>
             <Button
               icon={<ReloadOutlined />}
@@ -163,7 +163,7 @@ const Hosts = () => {
       {/* Add/Edit Modal */}
       <Modal
         width={450}
-        title={editingData ? "Edit Host" : "Tambah Host"}
+        title={editingData ? "Edit PIC" : "Tambah PIC"}
         open={modalOpen}
         cancelText="Batal"
         onCancel={() => setModalOpen(false)}
