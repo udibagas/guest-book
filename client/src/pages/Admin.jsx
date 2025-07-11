@@ -29,7 +29,7 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import dayjs from "dayjs";
 

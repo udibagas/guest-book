@@ -27,6 +27,9 @@ db.Guest = require("./guest")(sequelize, Sequelize);
 db.Visit = require("./visit")(sequelize, Sequelize);
 db.Purpose = require("./purpose")(sequelize, Sequelize);
 db.Host = require("./host")(sequelize, Sequelize);
+db.Department = require("./department")(sequelize, Sequelize);
+db.Role = require("./role")(sequelize, Sequelize);
+db.User = require("./user")(sequelize, Sequelize);
 
 // Define associations
 // Guest to Visit (One to Many)
@@ -57,6 +60,26 @@ db.Purpose.hasMany(db.Visit, {
 db.Visit.belongsTo(db.Purpose, {
   foreignKey: "purposeId",
   as: "Purpose",
+});
+
+// Department to Host (One to Many)
+db.Department.hasMany(db.Host, {
+  foreignKey: "departmentId",
+  as: "hosts",
+});
+db.Host.belongsTo(db.Department, {
+  foreignKey: "departmentId",
+  as: "Department",
+});
+
+// Role to Host (One to Many)
+db.Role.hasMany(db.Host, {
+  foreignKey: "roleId",
+  as: "hosts",
+});
+db.Host.belongsTo(db.Role, {
+  foreignKey: "roleId",
+  as: "Role",
 });
 
 module.exports = db;

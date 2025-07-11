@@ -1,6 +1,7 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { Purpose } = require("../models");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const router = express.Router();
 
 // Validation middleware
@@ -61,107 +62,119 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/purposes - Create new purpose
-router.post("/", validatePurpose, async (req, res) => {
-  try {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+router.post(
+  "/",
+  authenticateToken,
+  requireAdmin,
+  validatePurpose,
+  async (req, res) => {
+    try {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation errors",
+          errors: errors.array(),
+        });
+      }
+
+      const { name, description } = req.body;
+
+      const purpose = await Purpose.create({
+        name,
+        description: description || null,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Purpose created successfully",
+        data: purpose,
+      });
+    } catch (error) {
+      console.error("Error creating purpose:", error);
+
+      // Handle unique constraint errors
+      if (error.name === "SequelizeUniqueConstraintError") {
+        return res.status(400).json({
+          success: false,
+          message: "A purpose with this name already exists",
+          error: "Duplicate entry",
+        });
+      }
+
+      res.status(500).json({
         success: false,
-        message: "Validation errors",
-        errors: errors.array(),
+        message: "Error creating purpose",
+        error: error.message,
       });
     }
-
-    const { name, description } = req.body;
-
-    const purpose = await Purpose.create({
-      name,
-      description: description || null,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Purpose created successfully",
-      data: purpose,
-    });
-  } catch (error) {
-    console.error("Error creating purpose:", error);
-
-    // Handle unique constraint errors
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res.status(400).json({
-        success: false,
-        message: "A purpose with this name already exists",
-        error: "Duplicate entry",
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Error creating purpose",
-      error: error.message,
-    });
   }
-});
+);
 
 // PUT /api/purposes/:id - Update purpose
-router.put("/:id", validatePurpose, async (req, res) => {
-  try {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+router.put(
+  "/:id",
+  authenticateToken,
+  requireAdmin,
+  validatePurpose,
+  async (req, res) => {
+    try {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation errors",
+          errors: errors.array(),
+        });
+      }
+
+      const purpose = await Purpose.findByPk(req.params.id);
+
+      if (!purpose) {
+        return res.status(404).json({
+          success: false,
+          message: "Purpose not found",
+        });
+      }
+
+      const { name, description, isActive } = req.body;
+
+      await purpose.update({
+        name,
+        description: description || null,
+        ...(typeof isActive !== "undefined" && { isActive }),
+      });
+
+      res.json({
+        success: true,
+        message: "Purpose updated successfully",
+        data: purpose,
+      });
+    } catch (error) {
+      console.error("Error updating purpose:", error);
+
+      // Handle unique constraint errors
+      if (error.name === "SequelizeUniqueConstraintError") {
+        return res.status(400).json({
+          success: false,
+          message: "A purpose with this name already exists",
+          error: "Duplicate entry",
+        });
+      }
+
+      res.status(500).json({
         success: false,
-        message: "Validation errors",
-        errors: errors.array(),
+        message: "Error updating purpose",
+        error: error.message,
       });
     }
-
-    const purpose = await Purpose.findByPk(req.params.id);
-
-    if (!purpose) {
-      return res.status(404).json({
-        success: false,
-        message: "Purpose not found",
-      });
-    }
-
-    const { name, description, isActive } = req.body;
-
-    await purpose.update({
-      name,
-      description: description || null,
-      ...(typeof isActive !== "undefined" && { isActive }),
-    });
-
-    res.json({
-      success: true,
-      message: "Purpose updated successfully",
-      data: purpose,
-    });
-  } catch (error) {
-    console.error("Error updating purpose:", error);
-
-    // Handle unique constraint errors
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res.status(400).json({
-        success: false,
-        message: "A purpose with this name already exists",
-        error: "Duplicate entry",
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Error updating purpose",
-      error: error.message,
-    });
   }
-});
+);
 
 // DELETE /api/purposes/:id - Soft delete purpose (set inactive)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const purpose = await Purpose.findByPk(req.params.id);
 

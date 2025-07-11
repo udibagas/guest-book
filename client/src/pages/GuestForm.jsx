@@ -25,7 +25,7 @@ import {
   TeamOutlined,
   AimOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Webcam from "react-webcam";
 import axios from "axios";
 

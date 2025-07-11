@@ -3,11 +3,15 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
+const { sequelize } = require("./models");
 const guestRoutes = require("./routes/guests");
 const visitRoutes = require("./routes/visits");
 const purposeRoutes = require("./routes/purposes");
 const hostRoutes = require("./routes/hosts");
 const uploadRoutes = require("./routes/upload");
+const authRoutes = require("./routes/auth");
+const departmentRoutes = require("./routes/departments");
+const roleRoutes = require("./routes/roles");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,10 +25,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/guests", guestRoutes);
 app.use("/api/visits", visitRoutes);
 app.use("/api/purposes", purposeRoutes);
 app.use("/api/hosts", hostRoutes);
+app.use("/api/departments", departmentRoutes);
+app.use("/api/roles", roleRoutes);
 app.use("/api/upload", uploadRoutes);
 
 // Health check

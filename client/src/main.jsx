@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ConfigProvider } from "antd";
-import "./index.css";
+// import "./index.css";
 import App from "./App.jsx";
 import "@ant-design/v5-patch-for-react-19";
 

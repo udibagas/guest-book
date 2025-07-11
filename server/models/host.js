@@ -17,18 +17,34 @@ module.exports = (sequelize, DataTypes) => {
       },
       department: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Made nullable since we'll use departmentId
         validate: {
-          notEmpty: true,
-          len: [2, 100],
+          len: [0, 100],
+        },
+      },
+      departmentId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: "department_id",
+        references: {
+          model: "departments",
+          key: "id",
         },
       },
       role: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Made nullable since we'll use roleId
         validate: {
-          notEmpty: true,
-          len: [2, 100],
+          len: [0, 100],
+        },
+      },
+      roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: "role_id",
+        references: {
+          model: "roles",
+          key: "id",
         },
       },
       email: {
@@ -67,6 +83,12 @@ module.exports = (sequelize, DataTypes) => {
           fields: ["department"],
         },
         {
+          fields: ["department_id"],
+        },
+        {
+          fields: ["role_id"],
+        },
+        {
           fields: ["is_active"],
         },
       ],
@@ -79,16 +101,24 @@ module.exports = (sequelize, DataTypes) => {
       where: {
         isActive: true,
       },
+      include: [
+        { model: sequelize.models.Department, as: "Department" },
+        { model: sequelize.models.Role, as: "Role" },
+      ],
       order: [["name", "ASC"]],
     });
   };
 
-  Host.getHostsByDepartment = function (department) {
+  Host.getHostsByDepartment = function (departmentId) {
     return this.findAll({
       where: {
-        department: department,
+        departmentId: departmentId,
         isActive: true,
       },
+      include: [
+        { model: sequelize.models.Department, as: "Department" },
+        { model: sequelize.models.Role, as: "Role" },
+      ],
       order: [["name", "ASC"]],
     });
   };

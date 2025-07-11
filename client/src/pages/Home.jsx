@@ -1,7 +1,5 @@
-import React from "react";
-import { Typography, Button, Space } from "antd";
-import { useNavigate } from "react-router-dom";
-import QRCode from "qrcode.react";
+import { Typography, Button, Space, QRCode } from "antd";
+import { useNavigate } from "react-router";
 
 const { Title, Paragraph } = Typography;
 
@@ -33,12 +31,7 @@ const Home = () => {
           >
             Scan to Register
           </Title>
-          <QRCode
-            value={guestFormUrl}
-            size={200}
-            level="M"
-            includeMargin={true}
-          />
+          <QRCode value={guestFormUrl} size={200} />
           <Paragraph
             style={{ marginTop: 16, textAlign: "center", color: "#666" }}
           >
