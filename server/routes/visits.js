@@ -29,7 +29,7 @@ const validateVisit = [
     .withMessage("Company name must not exceed 100 characters"),
   body("guestData.idPhotoPath").notEmpty().withMessage("ID photo is required"),
   body("purposeId").isInt().withMessage("Purpose ID must be a valid integer"),
-  body("hostId")
+  body("HostId")
     .optional()
     .isInt()
     .withMessage("Host ID must be a valid integer"),
@@ -55,7 +55,7 @@ router.get("/", async (req, res) => {
       startDate,
       endDate,
       search,
-      hostId,
+      HostId,
       purposeId,
     } = req.query;
 
@@ -69,8 +69,8 @@ router.get("/", async (req, res) => {
     }
 
     // Filter by host
-    if (hostId) {
-      where.hostId = hostId;
+    if (HostId) {
+      where.HostId = HostId;
     }
 
     // Filter by purpose
@@ -306,7 +306,7 @@ router.post("/", validateVisit, async (req, res) => {
       });
     }
 
-    const { guestData, purposeId, hostId, customPurpose, notes } = req.body;
+    const { guestData, purposeId, HostId, customPurpose, notes } = req.body;
 
     // Verify purpose exists
     const purpose = await Purpose.findByPk(purposeId);
@@ -318,8 +318,8 @@ router.post("/", validateVisit, async (req, res) => {
     }
 
     // Verify host exists if provided
-    if (hostId) {
-      const host = await Host.findByPk(hostId);
+    if (HostId) {
+      const host = await Host.findByPk(HostId);
       if (!host) {
         return res.status(400).json({
           success: false,
@@ -335,7 +335,7 @@ router.post("/", validateVisit, async (req, res) => {
     const visit = await Visit.create({
       guestId: guest.id,
       purposeId,
-      hostId: hostId || null,
+      HostId: HostId || null,
       customPurpose: customPurpose || null,
       notes: notes || null,
       visitDate: new Date(),
@@ -435,10 +435,10 @@ router.put("/:id", async (req, res) => {
       });
     }
 
-    const { hostId, customPurpose, notes } = req.body;
+    const { HostId, customPurpose, notes } = req.body;
 
     await visit.update({
-      ...(hostId && { hostId }),
+      ...(HostId && { HostId }),
       ...(customPurpose !== undefined && { customPurpose }),
       ...(notes !== undefined && { notes }),
     });

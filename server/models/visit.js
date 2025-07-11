@@ -7,28 +7,25 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      guestId: {
+      GuestId: {
         type: DataTypes.UUID,
         allowNull: false,
-        field: "guest_id",
         references: {
           model: "guests",
           key: "id",
         },
       },
-      hostId: {
+      HostId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        field: "host_id",
         references: {
           model: "hosts",
           key: "id",
         },
       },
-      purposeId: {
+      PurposeId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "purpose_id",
         references: {
           model: "purposes",
           key: "id",
@@ -37,7 +34,6 @@ module.exports = (sequelize, DataTypes) => {
       customPurpose: {
         type: DataTypes.TEXT,
         allowNull: true,
-        field: "custom_purpose",
         validate: {
           len: [0, 500],
         },
@@ -46,18 +42,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATEONLY,
         allowNull: false,
         defaultValue: DataTypes.NOW,
-        field: "visit_date",
       },
       checkInTime: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
-        field: "check_in_time",
       },
       checkOutTime: {
         type: DataTypes.DATE,
         allowNull: true,
-        field: "check_out_time",
       },
       status: {
         type: DataTypes.ENUM("checked_in", "checked_out"),
@@ -84,13 +77,13 @@ module.exports = (sequelize, DataTypes) => {
           fields: ["purpose_id"],
         },
         {
-          fields: ["visit_date"],
+          fields: ["visitDate"],
         },
         {
           fields: ["status"],
         },
         {
-          fields: ["check_in_time"],
+          fields: ["checkInTime"],
         },
       ],
     }

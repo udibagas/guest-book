@@ -33,53 +33,23 @@ db.User = require("./user")(sequelize, Sequelize);
 
 // Define associations
 // Guest to Visit (One to Many)
-db.Guest.hasMany(db.Visit, {
-  foreignKey: "guestId",
-  as: "visits",
-});
-db.Visit.belongsTo(db.Guest, {
-  foreignKey: "guestId",
-  as: "Guest",
-});
+db.Guest.hasMany(db.Visit, { as: "visits" });
+db.Visit.belongsTo(db.Guest, { as: "Guest" });
 
 // Host to Visit (One to Many)
-db.Host.hasMany(db.Visit, {
-  foreignKey: "hostId",
-  as: "visits",
-});
-db.Visit.belongsTo(db.Host, {
-  foreignKey: "hostId",
-  as: "Host",
-});
+db.Host.hasMany(db.Visit, { as: "visits" });
+db.Visit.belongsTo(db.Host, { as: "Host" });
 
 // Purpose to Visit (One to Many)
-db.Purpose.hasMany(db.Visit, {
-  foreignKey: "purposeId",
-  as: "visits",
-});
-db.Visit.belongsTo(db.Purpose, {
-  foreignKey: "purposeId",
-  as: "Purpose",
-});
+db.Purpose.hasMany(db.Visit, { as: "visits" });
+db.Visit.belongsTo(db.Purpose, { as: "Purpose" });
 
 // Department to Host (One to Many)
-db.Department.hasMany(db.Host, {
-  foreignKey: "departmentId",
-  as: "hosts",
-});
-db.Host.belongsTo(db.Department, {
-  foreignKey: "departmentId",
-  as: "Department",
-});
+db.Department.hasMany(db.Host, { as: "hosts" });
+db.Host.belongsTo(db.Department, { as: "Department" });
 
 // Role to Host (One to Many)
-db.Role.hasMany(db.Host, {
-  foreignKey: "roleId",
-  as: "hosts",
-});
-db.Host.belongsTo(db.Role, {
-  foreignKey: "roleId",
-  as: "Role",
-});
+db.Role.hasMany(db.Host, { as: "hosts" });
+db.Host.belongsTo(db.Role, { as: "Role" });
 
 module.exports = db;

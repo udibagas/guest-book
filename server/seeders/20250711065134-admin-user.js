@@ -13,7 +13,7 @@ module.exports = {
         email: "admin@mitrateknik.com",
         password: hashedPassword,
         role: "admin",
-        is_active: true,
+        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

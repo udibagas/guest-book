@@ -18,7 +18,7 @@ import {
   ReloadOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import api from "../../api/axios";
+import api from "../../lib/api";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;

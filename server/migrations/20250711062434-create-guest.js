@@ -14,7 +14,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      phone_number: {
+      phoneNumber: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -30,7 +30,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      id_photo_path: {
+      idPhotoPath: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -45,7 +45,7 @@ module.exports = {
     });
 
     await queryInterface.addIndex("guests", ["email"]);
-    await queryInterface.addIndex("guests", ["phone_number"]);
+    await queryInterface.addIndex("guests", ["phoneNumber"]);
   },
 
   async down(queryInterface, Sequelize) {

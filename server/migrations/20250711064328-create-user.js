@@ -27,7 +27,7 @@ module.exports = {
         type: Sequelize.ENUM("admin", "user"),
         defaultValue: "user",
       },
-      is_active: {
+      isActive: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
@@ -44,7 +44,7 @@ module.exports = {
     await queryInterface.addIndex("users", ["username"]);
     await queryInterface.addIndex("users", ["email"]);
     await queryInterface.addIndex("users", ["role"]);
-    await queryInterface.addIndex("users", ["is_active"]);
+    await queryInterface.addIndex("users", ["isActive"]);
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("users");

@@ -19,7 +19,7 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      is_active: {
+      isActive: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
@@ -34,7 +34,7 @@ module.exports = {
     });
 
     await queryInterface.addIndex("purposes", ["name"]);
-    await queryInterface.addIndex("purposes", ["is_active"]);
+    await queryInterface.addIndex("purposes", ["isActive"]);
   },
 
   async down(queryInterface, Sequelize) {

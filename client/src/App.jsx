@@ -1,8 +1,20 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import { Layout } from "antd";
 import AdminLayout from "./components/AdminLayout";
+import { lazy } from "react";
 
 const { Content } = Layout;
+
+const Home = lazy(() => import("./pages/Home"));
+const GuestForm = lazy(() => import("./pages/GuestForm"));
+const Login = lazy(() => import("./pages/Login"));
+const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
+const Visits = lazy(() => import("./pages/admin/Visits"));
+const Guests = lazy(() => import("./pages/admin/Guests"));
+const Hosts = lazy(() => import("./pages/admin/Hosts"));
+const Departments = lazy(() => import("./pages/admin/Departments"));
+const Roles = lazy(() => import("./pages/admin/Roles"));
+const Purposes = lazy(() => import("./pages/admin/Purposes"));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -16,12 +28,9 @@ function App() {
       <Layout style={{ minHeight: "100vh" }}>
         <Content>
           <Routes>
-            <Route path="/" element={() => import("./pages/Home")} />
-            <Route
-              path="/guest-form"
-              element={() => import("./pages/GuestForm")}
-            />
-            <Route path="/login" element={() => import("./pages/Login")} />
+            <Route path="/" element={<Home />} />
+            <Route path="/guest-form" element={<GuestForm />} />
+            <Route path="/login" element={<Login />} />
             <Route
               path="/admin"
               element={
@@ -30,31 +39,13 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={() => import("./pages/admin/Dashboard")} />
-              <Route
-                path="visits"
-                element={() => import("./pages/admin/Visits")}
-              />
-              <Route
-                path="guests"
-                element={() => import("./pages/admin/Guests")}
-              />
-              <Route
-                path="hosts"
-                element={() => import("./pages/admin/Hosts")}
-              />
-              <Route
-                path="departments"
-                element={() => import("./pages/admin/Departments")}
-              />
-              <Route
-                path="roles"
-                element={() => import("./pages/admin/Roles")}
-              />
-              <Route
-                path="purposes"
-                element={() => import("./pages/admin/Purposes")}
-              />
+              <Route index element={<Dashboard />} />
+              <Route path="visits" element={<Visits />} />
+              <Route path="guests" element={<Guests />} />
+              <Route path="hosts" element={<Hosts />} />
+              <Route path="departments" element={<Departments />} />
+              <Route path="roles" element={<Roles />} />
+              <Route path="purposes" element={<Purposes />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

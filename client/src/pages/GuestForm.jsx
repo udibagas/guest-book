@@ -27,7 +27,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import Webcam from "react-webcam";
-import api from "../api/axios";
+import api from "../lib/api";
 import { useFetch } from "../hooks/useFetch";
 
 const { Title, Text } = Typography;
@@ -84,7 +84,7 @@ const GuestForm = () => {
           idPhotoPath: uploadResponse.data.data.filePath,
         },
         purposeId: values.purposeId,
-        hostId: values.hostId || null,
+        HostId: values.HostId || null,
         customPurpose: values.customPurpose || null,
         notes: values.notes || null,
       };
@@ -343,7 +343,7 @@ const GuestForm = () => {
 
           <Form.Item
             label="Orang yang Akan Ditemui"
-            name="hostId"
+            name="HostId"
             rules={[
               { required: true, message: "Pilih orang yang akan ditemui" },
             ]}

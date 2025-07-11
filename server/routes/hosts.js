@@ -19,11 +19,11 @@ const validateHost = [
     .trim()
     .isLength({ max: 15 })
     .withMessage("Phone number must not exceed 15 characters"),
-  body("departmentId")
+  body("DepartmentId")
     .optional()
     .isInt()
     .withMessage("Department ID must be a valid integer"),
-  body("roleId")
+  body("RoleId")
     .optional()
     .isInt()
     .withMessage("Role ID must be a valid integer"),
@@ -32,7 +32,7 @@ const validateHost = [
 // GET /api/hosts - Get all active hosts (public access for guest form)
 router.get("/", async (req, res) => {
   try {
-    const { department, departmentId, active } = req.query;
+    const { department, DepartmentId, active } = req.query;
 
     const whereClause = {};
     if (active === "true") {
@@ -45,8 +45,8 @@ router.get("/", async (req, res) => {
     ];
 
     let hosts;
-    if (departmentId) {
-      whereClause.departmentId = departmentId;
+    if (DepartmentId) {
+      whereClause.DepartmentId = DepartmentId;
     } else if (department) {
       whereClause.department = department;
     }
@@ -152,8 +152,8 @@ router.post(
         role,
         email,
         phoneNumber,
-        departmentId,
-        roleId,
+        DepartmentId,
+        RoleId,
         isActive = true,
       } = req.body;
 
@@ -175,8 +175,8 @@ router.post(
         role,
         email,
         phoneNumber,
-        departmentId,
-        roleId,
+        DepartmentId,
+        RoleId,
         isActive,
       });
 
@@ -243,8 +243,8 @@ router.put(
         role,
         email,
         phoneNumber,
-        departmentId,
-        roleId,
+        DepartmentId,
+        RoleId,
         isActive,
       } = req.body;
 
@@ -269,8 +269,8 @@ router.put(
         role,
         email,
         phoneNumber,
-        departmentId,
-        roleId,
+        DepartmentId,
+        RoleId,
         isActive,
       });
 

@@ -211,7 +211,7 @@ const Hosts = () => {
 
           <Form.Item
             label="Departemen"
-            name="departmentId"
+            name="DepartmentId"
             rules={[{ required: true, message: "Silakan pilih departemen" }]}
           >
             <Select placeholder="Pilih departemen">
@@ -225,7 +225,7 @@ const Hosts = () => {
 
           <Form.Item
             label="Jabatan"
-            name="roleId"
+            name="RoleId"
             rules={[{ required: true, message: "Silakan pilih jabatan" }]}
           >
             <Select placeholder="Pilih jabatan">

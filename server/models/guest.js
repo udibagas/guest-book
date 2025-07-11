@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
       phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: "phone_number",
         validate: {
           notEmpty: true,
           len: [10, 15],
@@ -50,7 +49,6 @@ module.exports = (sequelize, DataTypes) => {
       idPhotoPath: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: "id_photo_path",
       },
     },
     {
@@ -60,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
           fields: ["email"],
         },
         {
-          fields: ["phone_number"],
+          fields: ["phoneNumber"],
         },
       ],
     }

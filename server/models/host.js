@@ -15,19 +15,17 @@ module.exports = (sequelize, DataTypes) => {
           len: [2, 100],
         },
       },
-      departmentId: {
+      DepartmentId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        field: "department_id",
         references: {
           model: "departments",
           key: "id",
         },
       },
-      roleId: {
+      RoleId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        field: "role_id",
         references: {
           model: "roles",
           key: "id",
@@ -45,7 +43,6 @@ module.exports = (sequelize, DataTypes) => {
       phoneNumber: {
         type: DataTypes.STRING,
         allowNull: true,
-        field: "phone_number",
         validate: {
           len: [0, 15],
         },
@@ -53,7 +50,6 @@ module.exports = (sequelize, DataTypes) => {
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
-        field: "is_active",
       },
     },
     {
@@ -72,7 +68,7 @@ module.exports = (sequelize, DataTypes) => {
           fields: ["role_id"],
         },
         {
-          fields: ["is_active"],
+          fields: ["isActive"],
         },
       ],
     }
@@ -92,10 +88,10 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  Host.getHostsByDepartment = function (departmentId) {
+  Host.getHostsByDepartment = function (DepartmentId) {
     return this.findAll({
       where: {
-        departmentId: departmentId,
+        DepartmentId: DepartmentId,
         isActive: true,
       },
       include: [

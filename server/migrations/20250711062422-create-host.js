@@ -16,14 +16,14 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
+        allowNull: true,
+      },
+      phoneNumber: {
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },
-      phone_number: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      is_active: {
+      isActive: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
@@ -58,7 +58,7 @@ module.exports = {
     });
 
     await queryInterface.addIndex("hosts", ["email"]);
-    await queryInterface.addIndex("hosts", ["is_active"]);
+    await queryInterface.addIndex("hosts", ["isActive"]);
     await queryInterface.addIndex("hosts", ["department_id"]);
     await queryInterface.addIndex("hosts", ["role_id"]);
   },

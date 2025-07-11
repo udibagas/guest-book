@@ -17,7 +17,7 @@ import {
   Descriptions,
 } from "antd";
 import { EyeOutlined, LogoutOutlined, ReloadOutlined } from "@ant-design/icons";
-import api from "../../api/axios";
+import api from "../../lib/api";
 import dayjs from "dayjs";
 import { useCrud } from "../../hooks/useCrud";
 

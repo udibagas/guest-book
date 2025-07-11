@@ -6,7 +6,7 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
-import api from "../api/axios";
+import api from "../lib/api";
 
 const { Title, Text } = Typography;
 

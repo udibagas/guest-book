@@ -40,21 +40,21 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "RESTRICT",
       },
-      custom_purpose: {
+      customPurpose: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      visit_date: {
+      visitDate: {
         type: Sequelize.DATEONLY,
         allowNull: false,
         defaultValue: Sequelize.NOW,
       },
-      check_in_time: {
+      checkInTime: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
       },
-      check_out_time: {
+      checkOutTime: {
         type: Sequelize.DATE,
         allowNull: true,
       },
@@ -79,9 +79,9 @@ module.exports = {
     await queryInterface.addIndex("visits", ["guest_id"]);
     await queryInterface.addIndex("visits", ["host_id"]);
     await queryInterface.addIndex("visits", ["purpose_id"]);
-    await queryInterface.addIndex("visits", ["visit_date"]);
+    await queryInterface.addIndex("visits", ["visitDate"]);
     await queryInterface.addIndex("visits", ["status"]);
-    await queryInterface.addIndex("visits", ["check_in_time"]);
+    await queryInterface.addIndex("visits", ["checkInTime"]);
   },
 
   async down(queryInterface, Sequelize) {

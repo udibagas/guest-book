@@ -18,7 +18,7 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      is_active: {
+      isActive: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
@@ -33,7 +33,7 @@ module.exports = {
     });
 
     await queryInterface.addIndex("roles", ["name"]);
-    await queryInterface.addIndex("roles", ["is_active"]);
+    await queryInterface.addIndex("roles", ["isActive"]);
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("roles");
