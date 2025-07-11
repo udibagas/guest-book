@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Table,
   Card,
@@ -14,71 +14,40 @@ import {
   Modal,
   Image,
   message,
-  Popconfirm,
   Descriptions,
 } from "antd";
-import {
-  EyeOutlined,
-  LogoutOutlined,
-  DeleteOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, LogoutOutlined, ReloadOutlined } from "@ant-design/icons";
 import api from "../../api/axios";
 import dayjs from "dayjs";
+import { useCrud } from "../../hooks/useCrud";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const Visits = () => {
-  const [visits, setVisits] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
+
   const [filters, setFilters] = useState({
     search: "",
     status: "",
     dateRange: null,
   });
+
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const fetchVisits = async () => {
-    setLoading(true);
-    try {
-      const params = {
-        page: pagination.current,
-        limit: pagination.pageSize,
-        ...(filters.search && { search: filters.search }),
-        ...(filters.status && { status: filters.status }),
-        ...(filters.dateRange && {
-          startDate: filters.dateRange[0].format("YYYY-MM-DD"),
-          endDate: filters.dateRange[1].format("YYYY-MM-DD"),
-        }),
-      };
+  const {
+    useFetch: useFetchCrud,
+    refreshData,
+    queryClient,
+  } = useCrud("/visits");
 
-      const response = await api.get("/api/visits", { params });
-
-      setVisits(response.data.data.visits);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.data.data.pagination.totalCount,
-      }));
-    } catch (error) {
-      console.error("Error fetching visits:", error);
-      message.error("Gagal memuat data kunjungan");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchVisits();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.current, pagination.pageSize, filters]);
+  const { data, isPending } = useFetchCrud();
 
   const handleTableChange = (newPagination) => {
     setPagination(newPagination);
@@ -103,21 +72,10 @@ const Visits = () => {
     try {
       await api.put(`/api/visits/${visitId}/checkout`);
       message.success("Tamu berhasil check out");
-      fetchVisits();
+      queryClient.invalidateQueries({ queryKey: "/visits" });
     } catch (error) {
       console.error("Error checking out visit:", error);
       message.error("Gagal check out tamu");
-    }
-  };
-
-  const handleDelete = async (visitId) => {
-    try {
-      await api.delete(`/api/visits/${visitId}`);
-      message.success("Catatan kunjungan berhasil dihapus");
-      fetchVisits();
-    } catch (error) {
-      console.error("Error deleting visit:", error);
-      message.error("Gagal menghapus catatan kunjungan");
     }
   };
 
@@ -196,19 +154,6 @@ const Visits = () => {
               title="Check Out"
             />
           )}
-          <Popconfirm
-            title="Apakah Anda yakin ingin menghapus catatan kunjungan ini?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Ya"
-            cancelText="Tidak"
-          >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              title="Hapus"
-            />
-          </Popconfirm>
         </Space>
       ),
     },
@@ -218,18 +163,18 @@ const Visits = () => {
     <>
       <Card>
         <div className="page-header">
-          <Title level={2}>Manajemen Kunjungan</Title>
+          <Title level={3}>Kelola Kunjungan</Title>
           <Button
             icon={<ReloadOutlined />}
-            onClick={fetchVisits}
-            loading={loading}
+            onClick={refreshData}
+            loading={isPending}
           >
             Perbarui
           </Button>
         </div>
 
         {/* Filters */}
-        <Card className="filter-card" style={{ marginBottom: 16 }}>
+        <Card style={{ marginBottom: 16 }}>
           <Title level={4} style={{ marginBottom: 16 }}>
             Filter Data
           </Title>
@@ -240,7 +185,6 @@ const Visits = () => {
                 allowClear
                 onSearch={handleSearch}
                 style={{ width: "100%" }}
-                size="large"
               />
             </Col>
             <Col xs={24} sm={6}>
@@ -249,7 +193,6 @@ const Visits = () => {
                 allowClear
                 style={{ width: "100%" }}
                 onChange={handleStatusFilter}
-                size="large"
               >
                 <Option value="checked_in">Sudah Masuk</Option>
                 <Option value="checked_out">Sudah Keluar</Option>
@@ -260,7 +203,6 @@ const Visits = () => {
                 style={{ width: "100%" }}
                 onChange={handleDateFilter}
                 placeholder={["Tanggal Mulai", "Tanggal Akhir"]}
-                size="large"
               />
             </Col>
           </Row>
@@ -269,9 +211,9 @@ const Visits = () => {
         {/* Visit Table */}
         <Table
           columns={columns}
-          dataSource={visits}
+          dataSource={data?.rows || []}
           rowKey="id"
-          loading={loading}
+          loading={isPending}
           pagination={{
             ...pagination,
             showSizeChanger: true,
@@ -280,7 +222,6 @@ const Visits = () => {
               `${range[0]}-${range[1]} dari ${total} kunjungan`,
           }}
           onChange={handleTableChange}
-          scroll={{ x: 800 }}
         />
       </Card>
 

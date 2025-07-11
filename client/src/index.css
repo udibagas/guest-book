@@ -269,32 +269,6 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
 }
 
-.filter-card,
-.table-card {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-}
-
-.filter-card .ant-input-search:focus-within,
-.filter-card .ant-select:focus-within,
-.filter-card .ant-picker:focus-within {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-}
-
-.visit-card {
-  margin-bottom: 16px;
-  border-radius: 12px !important;
-  transition: all 0.3s ease;
-}
-
-.visit-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-}
-
 .status-badge {
   padding: 4px 12px;
   border-radius: 20px;

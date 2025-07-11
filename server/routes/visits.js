@@ -118,7 +118,7 @@ router.get("/", async (req, res) => {
         {
           model: Host,
           as: "Host",
-          attributes: ["id", "name", "department", "role"],
+          attributes: ["id", "name"],
         },
         {
           model: Purpose,
@@ -128,7 +128,7 @@ router.get("/", async (req, res) => {
       ],
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [["createdAt", "DESC"]],
+      order: [["created_at", "DESC"]],
       distinct: true,
     });
 

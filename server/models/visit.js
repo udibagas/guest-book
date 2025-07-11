@@ -121,7 +121,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         {
           association: "Host",
-          attributes: ["name", "department", "role"],
+          attributes: ["name"],
         },
         {
           association: "Purpose",
@@ -155,7 +155,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         {
           association: "Host",
-          attributes: ["name", "department", "role"],
+          attributes: ["name"],
         },
         {
           association: "Purpose",
@@ -178,7 +178,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         {
           association: "Host",
-          attributes: ["name", "department", "role"],
+          attributes: ["name"],
         },
         {
           association: "Purpose",
