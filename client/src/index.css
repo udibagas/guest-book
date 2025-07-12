@@ -180,11 +180,15 @@ body {
 }
 
 .guest-form-container .ant-card {
-  max-width: 800px;
+  max-width: 850px;
   margin: 0 auto;
   border-radius: 16px !important;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
   border: none !important;
+
+  @media screen and (min-width: 900px) {
+    min-width: 850px;
+  }
 }
 
 .guest-form-container .ant-card-head {
@@ -205,15 +209,6 @@ body {
 .guest-form-container .steps-content {
   min-height: 300px;
   padding: 24px 0;
-}
-
-.guest-form-container .steps-action {
-  margin-top: 24px;
-  text-align: center;
-}
-
-.guest-form-container .steps-action .ant-btn {
-  margin: 0 8px;
 }
 
 .photo-upload-container {
@@ -658,12 +653,6 @@ body {
     margin-bottom: 24px !important;
   }
 
-  .guest-form-container .steps-action .ant-btn {
-    margin: 4px;
-    width: 100%;
-    max-width: 200px;
-  }
-  
   .photo-preview {
     max-width: 150px;
     max-height: 150px;

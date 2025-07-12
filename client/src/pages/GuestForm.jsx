@@ -572,7 +572,7 @@ const GuestForm = () => {
             </div>
           </div>
 
-          <div className="steps-action" style={{ marginTop: 24 }}>
+          <div style={{ textAlign: "right" }}>
             {currentStep > 0 && (
               <Button
                 style={{ margin: "10px 8px" }}
