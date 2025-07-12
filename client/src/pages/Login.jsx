@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, Form, Input, Button, Typography, message } from "antd";
 import {
   UserOutlined,
@@ -12,7 +12,35 @@ const { Title, Text } = Typography;
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
+
+  // Check if user is already logged in and redirect to admin
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+
+      if (token && user) {
+        try {
+          // Validate token by making a request to a protected endpoint
+          await api.get("/auth/me");
+          // If request succeeds, token is valid - redirect to admin
+          navigate("/admin", { replace: true });
+        } catch (error) {
+          // Token is invalid or expired, clear localStorage
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          console.log("Token validation failed:", error);
+        }
+      }
+
+      setCheckingAuth(false);
+    };
+
+    checkAuthStatus();
+  }, [navigate]);
+
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -37,6 +65,19 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (checkingAuth) {
+    return (
+      <div className="login-container">
+        <Card className="login-card">
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <Button loading>Memeriksa status login...</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="login-container">

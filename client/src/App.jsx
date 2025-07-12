@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
-import { Layout } from "antd";
+import { Layout, Spin } from "antd";
 import AdminLayout from "./components/AdminLayout";
-import { lazy } from "react";
+import { lazy, useState, useEffect } from "react";
+import api from "./lib/api";
 
 const { Content } = Layout;
 
@@ -19,8 +20,55 @@ const Users = lazy(() => import("./pages/admin/Users"));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
+  const [isValidating, setIsValidating] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const validateToken = async () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+
+      if (!token || !user) {
+        setIsAuthenticated(false);
+        setIsValidating(false);
+        return;
+      }
+
+      try {
+        // Validate token by making a request to the backend
+        await api.get("/auth/me");
+        setIsAuthenticated(true);
+      } catch (error) {
+        // Token is invalid or expired, clear localStorage
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setIsAuthenticated(false);
+        console.log("Token validation failed:", error);
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateToken();
+  }, []);
+
+  // Show loading while validating token
+  if (isValidating) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Spin size="large" tip="Memvalidasi akses..." />
+      </div>
+    );
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
