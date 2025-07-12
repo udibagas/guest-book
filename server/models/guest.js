@@ -25,26 +25,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       email: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
           isEmail: true,
-          notEmpty: true,
         },
       },
       company: {
         type: DataTypes.STRING,
         allowNull: true,
-        validate: {
-          len: [0, 100],
-        },
       },
       role: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-          len: [2, 100],
-        },
+        allowNull: true,
       },
       idPhotoPath: {
         type: DataTypes.STRING,
@@ -67,9 +59,7 @@ module.exports = (sequelize, DataTypes) => {
   // Class methods
   Guest.findOrCreateGuest = async function (guestData) {
     const [guest, created] = await this.findOrCreate({
-      where: {
-        email: guestData.email,
-      },
+      where: { phoneNumber: guestData.phoneNumber },
       defaults: guestData,
     });
 
