@@ -11,6 +11,8 @@ import {
   Result,
   Select,
   Steps,
+  Row,
+  Col,
 } from "antd";
 import {
   UserOutlined,
@@ -163,106 +165,154 @@ const GuestForm = () => {
         />
       </Form.Item>
 
-      <Form.Item
-        label="Nomor Telepon"
-        name="phoneNumber"
-        rules={[
-          {
-            required: true,
-            message: "Silakan masukkan nomor telepon Anda",
-          },
-          {
-            pattern: /^[0-9+\-\s()]+$/,
-            message: "Silakan masukkan nomor telepon yang valid",
-          },
-          { min: 10, message: "Nomor telepon minimal 10 digit" },
-        ]}
-      >
-        <Input
-          prefix={<PhoneOutlined />}
-          placeholder="Masukkan nomor telepon Anda"
-          onChange={handlePhoneNumberChange}
-          onBlur={handlePhoneNumberChange}
-        />
-      </Form.Item>
+      <Row gutter={[16, 0]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Nomor Telepon"
+            name="phoneNumber"
+            rules={[
+              {
+                required: true,
+                message: "Silakan masukkan nomor telepon Anda",
+              },
+              {
+                pattern: /^[0-9+\-\s()]+$/,
+                message: "Silakan masukkan nomor telepon yang valid",
+              },
+              { min: 10, message: "Nomor telepon minimal 10 digit" },
+            ]}
+          >
+            <Input
+              prefix={<PhoneOutlined />}
+              placeholder="Masukkan nomor telepon Anda"
+              onChange={handlePhoneNumberChange}
+              onBlur={handlePhoneNumberChange}
+            />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Alamat Email"
+            name="email"
+            rules={[
+              {
+                type: "email",
+                message: "Silakan masukkan alamat email yang valid",
+              },
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined />}
+              placeholder="Masukkan alamat email Anda"
+            />
+          </Form.Item>
+        </Col>
+      </Row>
 
-      <Form.Item
-        label="Alamat Email"
-        name="email"
-        rules={[
-          {
-            type: "email",
-            message: "Silakan masukkan alamat email yang valid",
-          },
-        ]}
-      >
-        <Input
-          prefix={<MailOutlined />}
-          placeholder="Masukkan alamat email Anda"
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Perusahaan"
-        name="company"
-        rules={[
-          {
-            max: 100,
-            message: "Nama perusahaan maksimal 100 karakter",
-          },
-        ]}
-      >
-        <Input
-          prefix={<BankOutlined />}
-          placeholder="Masukkan nama perusahaan (opsional)"
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Jabatan/Posisi"
-        name="role"
-        rules={[
-          { min: 2, message: "Jabatan minimal 2 karakter" },
-          { max: 100, message: "Jabatan maksimal 100 karakter" },
-        ]}
-      >
-        <Input
-          prefix={<IdcardOutlined />}
-          placeholder="Masukkan jabatan atau posisi Anda (opsional)"
-        />
-      </Form.Item>
+      <Row gutter={[16, 0]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Perusahaan"
+            name="company"
+            rules={[
+              {
+                max: 100,
+                message: "Nama perusahaan maksimal 100 karakter",
+              },
+            ]}
+          >
+            <Input
+              prefix={<BankOutlined />}
+              placeholder="Masukkan nama perusahaan (opsional)"
+            />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Jabatan/Posisi"
+            name="role"
+            rules={[
+              { min: 2, message: "Jabatan minimal 2 karakter" },
+              { max: 100, message: "Jabatan maksimal 100 karakter" },
+            ]}
+          >
+            <Input
+              prefix={<IdcardOutlined />}
+              placeholder="Masukkan jabatan/posisi Anda (opsional)"
+            />
+          </Form.Item>
+        </Col>
+      </Row>
     </>
   );
 
   const renderVisitInfoStep = () => (
     <>
-      <Form.Item
-        label="Tujuan Kunjungan"
-        name="PurposeId"
-        rules={[
-          {
-            required: true,
-            message: "Silakan pilih tujuan kunjungan Anda",
-          },
-        ]}
-      >
-        <Select
-          showSearch
-          optionFilterProp="text"
-          placeholder="Pilih tujuan kunjungan"
-          onChange={handlePurposeChange}
-          options={purposes.map((purpose) => ({
-            text: purpose.name,
-            label: (
-              <>
-                {" "}
-                <AimOutlined /> {purpose.name}
-              </>
-            ),
-            value: purpose.id,
-          }))}
-        />
-      </Form.Item>
+      <Row gutter={[16, 0]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Tujuan Kunjungan"
+            name="PurposeId"
+            rules={[
+              {
+                required: true,
+                message: "Silakan pilih tujuan kunjungan Anda",
+              },
+            ]}
+          >
+            <Select
+              showSearch
+              optionFilterProp="text"
+              placeholder="Pilih tujuan kunjungan"
+              onChange={handlePurposeChange}
+              options={purposes.map((purpose) => ({
+                text: purpose.name,
+                label: (
+                  <>
+                    <AimOutlined /> {purpose.name}
+                  </>
+                ),
+                value: purpose.id,
+              }))}
+            />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Orang yang Akan Ditemui"
+            name="HostId"
+            rules={[
+              { required: true, message: "Pilih orang yang akan ditemui" },
+            ]}
+          >
+            <Select
+              showSearch
+              optionFilterProp="text"
+              placeholder="Pilih orang yang akan ditemui"
+              allowClear
+              options={hosts.map((host) => ({
+                text: host.name,
+                label: (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      <UserOutlined /> {host.name}{" "}
+                      <i style={{ color: "#999" }}>{host.Role.name}</i>
+                    </div>
+                    {host.Department.name}
+                  </div>
+                ),
+                value: host.id,
+              }))}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
 
       {showCustomPurpose && (
         <Form.Item
@@ -281,38 +331,6 @@ const GuestForm = () => {
           />
         </Form.Item>
       )}
-
-      <Form.Item
-        label="Orang yang Akan Ditemui"
-        name="HostId"
-        rules={[{ required: true, message: "Pilih orang yang akan ditemui" }]}
-      >
-        <Select
-          showSearch
-          optionFilterProp="text"
-          placeholder="Pilih orang yang akan ditemui"
-          allowClear
-          options={hosts.map((host) => ({
-            text: host.name,
-            label: (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div>
-                  <UserOutlined /> {host.name}{" "}
-                  <i style={{ color: "#999" }}>{host.Role.name}</i>
-                </div>
-                {host.Department.name}
-              </div>
-            ),
-            value: host.id,
-          }))}
-        />
-      </Form.Item>
 
       <Form.Item
         label="Catatan Tambahan"
@@ -565,12 +583,9 @@ const GuestForm = () => {
               </Button>
             )}
             {currentStep < steps.length - 1 && (
-              <Button
-                type="primary"
-                onClick={next}
-                icon={<ArrowRightOutlined />}
-              >
+              <Button type="primary" onClick={next}>
                 Selanjutnya
+                <ArrowRightOutlined />
               </Button>
             )}
             {currentStep === steps.length - 1 && (
