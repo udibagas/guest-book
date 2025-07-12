@@ -47,18 +47,18 @@ const validateVisit = [
 
 // GET /api/visits - Get all visits with optional filtering
 router.get("/", async (req, res) => {
-  try {
-    const {
-      page = 1,
-      limit = 10,
-      status,
-      startDate,
-      endDate,
-      search,
-      HostId,
-      PurposeId,
-    } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    status,
+    startDate,
+    endDate,
+    search,
+    HostId,
+    PurposeId,
+  } = req.query;
 
+  try {
     const offset = (page - 1) * limit;
     const where = {};
     const guestWhere = {};
@@ -104,7 +104,7 @@ router.get("/", async (req, res) => {
         {
           model: Guest,
           as: "Guest",
-          where: Object.keys(guestWhere).length > 0 ? guestWhere : undefined,
+          where: guestWhere,
           attributes: [
             "id",
             "name",

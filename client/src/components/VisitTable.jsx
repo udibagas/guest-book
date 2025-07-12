@@ -2,8 +2,11 @@ import { Table, Tag } from "antd";
 import { useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 import dayjs from "dayjs";
+import VisitDetail from "./VisitDetail";
 
 export default function VisitTable() {
+  const [selectedVisit, setSelectedVisit] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -14,6 +17,11 @@ export default function VisitTable() {
     page: pagination.current,
     limit: pagination.pageSize,
   });
+
+  function showDetail(data) {
+    setSelectedVisit(data);
+    setModalVisible(true);
+  }
 
   const columns = [
     {
@@ -59,20 +67,32 @@ export default function VisitTable() {
   ];
 
   return (
-    <Table
-      size="middle"
-      columns={columns}
-      dataSource={data?.data?.rows || []}
-      rowKey="id"
-      loading={isPending}
-      pagination={{
-        ...pagination,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total, range) =>
-          `${range[0]}-${range[1]} dari ${total} kunjungan`,
-      }}
-      onChange={(pagination) => setPagination(pagination)}
-    />
+    <>
+      <Table
+        size="middle"
+        columns={columns}
+        dataSource={data?.data?.rows || []}
+        rowKey="id"
+        loading={isPending}
+        onRow={(record) => ({
+          onClick: () => showDetail(record),
+          style: { cursor: "pointer" },
+        })}
+        pagination={{
+          ...pagination,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} dari ${total} kunjungan`,
+        }}
+        onChange={(pagination) => setPagination(pagination)}
+      />
+
+      <VisitDetail
+        visit={selectedVisit}
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+      />
+    </>
   );
 }
