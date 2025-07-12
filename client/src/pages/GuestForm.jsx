@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Form,
   Input,
@@ -42,15 +42,62 @@ const GuestForm = () => {
   const [idPhotoUrl, setIdPhotoUrl] = useState(null);
   const [showCustomPurpose, setShowCustomPurpose] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [searchTimeout, setSearchTimeout] = useState(null);
   const webcamRef = useRef(null);
   const navigate = useNavigate();
 
   const { data: purposes = [] } = useFetch("/purposes");
   const { data: hosts = [] } = useFetch("/hosts");
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
   const handlePurposeChange = (value) => {
     const purpose = purposes.find((p) => p.id === value);
     setShowCustomPurpose(purpose && purpose.name === "Other");
+  };
+
+  const handlePhoneNumberChange = async (e) => {
+    const phoneNumber = e.target.value;
+
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Only search if phone number has at least 10 digits
+    if (phoneNumber && phoneNumber.replace(/[^0-9]/g, "").length >= 10) {
+      // Debounce the search to avoid too many API calls
+      const timeout = setTimeout(async () => {
+        try {
+          const response = await api.get(`/guests/search?query=${phoneNumber}`);
+
+          if (response.data) {
+            const guest = response.data;
+
+            // Pre-fill form fields with existing guest data
+            form.setFieldsValue({
+              email: guest.email || "",
+              company: guest.company || "",
+              role: guest.role || "",
+            });
+
+            message.success("Data tamu ditemukan dan telah diisi otomatis");
+          }
+        } catch (error) {
+          // Silent fail - don't show error to user as this is just a convenience feature
+          console.log("Guest search failed:", error);
+        }
+      }, 800); // Wait 800ms after user stops typing
+
+      setSearchTimeout(timeout);
+    }
   };
 
   const next = async () => {
@@ -134,6 +181,8 @@ const GuestForm = () => {
         <Input
           prefix={<PhoneOutlined />}
           placeholder="Masukkan nomor telepon Anda"
+          onChange={handlePhoneNumberChange}
+          onBlur={handlePhoneNumberChange}
         />
       </Form.Item>
 
