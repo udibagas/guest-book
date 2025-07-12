@@ -26,7 +26,7 @@ const Dashboard = () => {
         <Button
           icon={<ReloadOutlined />}
           onClick={() =>
-            queryClient.invalidateQueries({ queryKey: "/visits/stats" })
+            queryClient.invalidateQueries({ queryKey: ["/visits/stats"] })
           }
           loading={loading}
         >
@@ -102,13 +102,7 @@ const Dashboard = () => {
         </Col>
       </Row> */}
 
-      <Card
-        title="Aktivitas Terbaru"
-        className="activity-card"
-        extra={<Link to="/admin/visits">Lihat Semua</Link>}
-      >
-        <VisitTable />
-      </Card>
+      <VisitTable />
     </Card>
   );
 };

@@ -1,10 +1,14 @@
-import { Table, Tag } from "antd";
-import { useState } from "react";
+import { Button, Table, Tag, Card } from "antd";
+import { useMemo, useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 import dayjs from "dayjs";
 import VisitDetail from "./VisitDetail";
+import { Link } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { ReloadOutlined } from "@ant-design/icons";
 
 export default function VisitTable() {
+  const queryClient = useQueryClient();
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [pagination, setPagination] = useState({
@@ -13,10 +17,14 @@ export default function VisitTable() {
     total: 0,
   });
 
-  const { data, isPending } = useFetch("/visits", {
-    page: pagination.current,
-    limit: pagination.pageSize,
-  });
+  const params = useMemo(() => {
+    return {
+      page: pagination.current,
+      limit: pagination.pageSize,
+    };
+  }, [pagination]);
+
+  const { data, isPending } = useFetch("/visits", params);
 
   function showDetail(data) {
     setSelectedVisit(data);
@@ -67,7 +75,23 @@ export default function VisitTable() {
   ];
 
   return (
-    <>
+    <Card
+      title="Aktivitas Terbaru"
+      className="activity-card"
+      extra={
+        <>
+          <Link to="/admin/visits">Lihat Semua</Link>
+          <Button
+            type="link"
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: ["/visits", params] })
+            }
+          >
+            <ReloadOutlined /> Perbarui
+          </Button>
+        </>
+      }
+    >
       <Table
         size="middle"
         columns={columns}
@@ -93,6 +117,6 @@ export default function VisitTable() {
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
       />
-    </>
+    </Card>
   );
 }
