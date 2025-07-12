@@ -181,9 +181,9 @@ export default function VisitDetail({
                 <div style={{ textAlign: "center" }}>
                   {visit.Guest?.idPhotoPath ? (
                     <Image
-                      src={`${
-                        import.meta.env.VITE_API_URL || "http://localhost:5001"
-                      }${visit.Guest.idPhotoPath}`}
+                      src={`${import.meta.env.VITE_API_URL || ""}${
+                        visit.Guest.idPhotoPath
+                      }`}
                       alt="Identitas Tamu"
                       style={{
                         maxWidth: "100%",
