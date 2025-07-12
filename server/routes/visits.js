@@ -119,6 +119,11 @@ router.get("/", async (req, res) => {
           model: Host,
           as: "Host",
           attributes: ["id", "name"],
+          include: {
+            model: Department,
+            as: "Department",
+            attributes: ["id", "name"],
+          },
         },
         {
           model: Purpose,
@@ -266,6 +271,11 @@ router.get("/:id", async (req, res) => {
           model: Host,
           as: "Host",
           attributes: ["id", "name", "email", "phoneNumber"],
+          include: {
+            model: Department,
+            as: "Department",
+            attributes: ["id", "name"],
+          },
         },
         {
           model: Purpose,
