@@ -162,6 +162,127 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/visits/reports - Get visit reports
+router.get("/reports", async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  try {
+    const { sequelize } = require("../models");
+
+    // Build date filter condition
+    let dateCondition = "";
+    const replacements = {};
+
+    if (startDate && endDate) {
+      dateCondition = 'WHERE v."visitDate" BETWEEN :startDate AND :endDate';
+      replacements.startDate = startDate;
+      replacements.endDate = endDate;
+    } else if (startDate) {
+      dateCondition = 'WHERE v."visitDate" >= :startDate';
+      replacements.startDate = startDate;
+    } else if (endDate) {
+      dateCondition = 'WHERE v."visitDate" <= :endDate';
+      replacements.endDate = endDate;
+    }
+
+    // Get total visits count
+    const totalVisitsQuery = `
+      SELECT COUNT(*) as total
+      FROM "visits" v
+      ${dateCondition}
+    `;
+
+    const [totalVisitsResult] = await sequelize.query(totalVisitsQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT,
+    });
+    const totalVisits = parseInt(totalVisitsResult.total);
+
+    // Get visits by department
+    const departmentQuery = `
+      SELECT 
+        COALESCE(d.name, 'Tidak Diketahui') as name,
+        COUNT(*) as count
+      FROM "visits" v
+      LEFT JOIN "hosts" h ON v."HostId" = h.id
+      LEFT JOIN "departments" d ON h."DepartmentId" = d.id
+      ${dateCondition}
+      GROUP BY d.name
+      ORDER BY count DESC
+    `;
+
+    const visitsByDepartment = await sequelize.query(departmentQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    // Convert count to integer
+    const visitsByDepartmentData = visitsByDepartment.map((item) => ({
+      name: item.name,
+      count: parseInt(item.count),
+    }));
+
+    // Get visits by purpose
+    const purposeQuery = `
+      SELECT 
+        p.name,
+        COUNT(*) as count
+      FROM "visits" v
+      LEFT JOIN "purposes" p ON v."PurposeId" = p.id
+      ${dateCondition}
+      GROUP BY p.name
+      ORDER BY count DESC
+    `;
+
+    const visitsByPurpose = await sequelize.query(purposeQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    // Convert count to integer
+    const visitsByPurposeData = visitsByPurpose.map((item) => ({
+      name: item.name,
+      count: parseInt(item.count),
+    }));
+
+    // Get visits by day
+    const dailyQuery = `
+      SELECT 
+        DATE(v."visitDate") as date,
+        COUNT(*) as count
+      FROM "visits" v
+      ${dateCondition}
+      GROUP BY DATE(v."visitDate")
+      ORDER BY DATE(v."visitDate") ASC
+    `;
+
+    const visitsByDay = await sequelize.query(dailyQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    // Convert count to integer and format date
+    const visitsByDayData = visitsByDay.map((item) => ({
+      date: item.date,
+      count: parseInt(item.count),
+    }));
+
+    res.json({
+      totalVisits,
+      visitsByDepartment: visitsByDepartmentData,
+      visitsByPurpose: visitsByPurposeData,
+      visitsByDay: visitsByDayData,
+    });
+  } catch (error) {
+    console.error("Error fetching report data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching report data",
+      error: error.message,
+    });
+  }
+});
+
 // GET /api/visits/today - Get today's visitors
 router.get("/today", async (req, res) => {
   try {

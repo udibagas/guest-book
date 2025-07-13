@@ -24,6 +24,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   UsergroupAddOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate, useLocation } from "react-router";
 
@@ -97,6 +98,11 @@ const AdminLayout = () => {
       key: "/admin/hosts",
       icon: <UserOutlined />,
       label: "PIC",
+    },
+    {
+      key: "/admin/reports",
+      icon: <BarChartOutlined />,
+      label: "Laporan",
     },
   ];
 
