@@ -20,7 +20,7 @@ const Dashboard = () => {
   const { data: stats = {}, isPending: loading } = useFetch("/visits/stats");
 
   return (
-    <Card style={{ minHeight: "calc(100vh - 100px)" }}>
+    <div style={{ minHeight: "calc(100vh - 100px)", padding: 24 }}>
       <div className="dashboard-header">
         <Title level={3}>Dashboard</Title>
         <Button
@@ -103,7 +103,7 @@ const Dashboard = () => {
       </Row> */}
 
       <VisitTable />
-    </Card>
+    </div>
   );
 };
 

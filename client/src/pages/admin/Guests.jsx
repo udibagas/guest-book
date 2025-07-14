@@ -1,11 +1,24 @@
-import { Table, Card, Input, Button, Typography, Space, Image } from "antd";
+import {
+  Table,
+  Card,
+  Input,
+  Button,
+  Typography,
+  Space,
+  Image,
+  Modal,
+  Descriptions,
+  Tag,
+} from "antd";
 import {
   EditOutlined,
   ReloadOutlined,
   SettingOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { useCrud } from "../../hooks/useCrud";
 import { useState } from "react";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
@@ -17,6 +30,8 @@ const Guests = () => {
   });
 
   const [searchText, setSearchText] = useState("");
+  const [selectedGuest, setSelectedGuest] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   const handleSearch = (value) => {
     setSearchText(value);
@@ -25,6 +40,16 @@ const Guests = () => {
 
   const handleTableChange = (pagination) => {
     setPagination(pagination);
+  };
+
+  const showDetail = (guest) => {
+    setSelectedGuest(guest);
+    setDetailModalOpen(true);
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalOpen(false);
+    setSelectedGuest(null);
   };
 
   const { useFetch: useFetchCrud, refreshData } = useCrud("/guests");
@@ -57,6 +82,31 @@ const Guests = () => {
       dataIndex: "role",
       key: "role",
     },
+    {
+      title: "Total Kunjungan",
+      dataIndex: "totalVisits",
+      key: "totalVisits",
+      width: 120,
+      align: "center",
+      render: (totalVisits) => <Tag color="blue">{totalVisits || 0}</Tag>,
+    },
+    {
+      title: "",
+      key: "actions",
+      width: 120,
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
+            size="small"
+            onClick={() => showDetail(record)}
+          >
+            Detail
+          </Button>
+        </Space>
+      ),
+    },
   ];
 
   return (
@@ -88,6 +138,9 @@ const Guests = () => {
           dataSource={data?.data?.rows || []}
           rowKey="id"
           loading={isPending}
+          onRow={(record) => ({
+            onClick: () => showDetail(record),
+          })}
           pagination={{
             ...pagination,
             showSizeChanger: true,
@@ -98,6 +151,58 @@ const Guests = () => {
           onChange={handleTableChange}
         />
       </Card>
+
+      {/* Guest Detail Modal */}
+      <Modal
+        title="Detail Tamu"
+        open={detailModalOpen}
+        onCancel={closeDetailModal}
+        footer={[
+          <Button key="close" onClick={closeDetailModal}>
+            Tutup
+          </Button>,
+        ]}
+        width={600}
+      >
+        {selectedGuest && (
+          <Descriptions column={1} bordered size="small">
+            <Descriptions.Item label="Nama">
+              {selectedGuest.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {selectedGuest.email || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nomor Telepon">
+              {selectedGuest.phoneNumber}
+            </Descriptions.Item>
+            <Descriptions.Item label="Perusahaan">
+              {selectedGuest.company || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jabatan">
+              {selectedGuest.role || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Foto ID">
+              {selectedGuest.idPhotoPath ? (
+                <Image
+                  src={selectedGuest.idPhotoPath}
+                  alt="ID Photo"
+                  style={{ maxWidth: "200px", maxHeight: "150px" }}
+                />
+              ) : (
+                "-"
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tanggal Terdaftar">
+              {selectedGuest.createdAt
+                ? dayjs(selectedGuest.createdAt).format("DD MMMM YYYY, HH:mm")
+                : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Total Kunjungan">
+              <Tag color="blue">{selectedGuest.totalVisits || 0} kunjungan</Tag>
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
     </>
   );
 };

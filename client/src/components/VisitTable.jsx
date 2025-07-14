@@ -77,7 +77,6 @@ export default function VisitTable() {
   return (
     <Card
       title="Aktivitas Terbaru"
-      className="activity-card"
       extra={
         <>
           <Link to="/admin/visits">Lihat Semua</Link>

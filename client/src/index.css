@@ -479,7 +479,6 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  padding-bottom: 16px;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -497,22 +496,13 @@ body {
 }
 
 .stats-card {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important; */
   transition: all 0.3s ease !important;
 }
 
 .stats-card:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-}
-
-.activity-card,
-.monthly-stats-card {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 .filter-card {

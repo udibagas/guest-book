@@ -1,6 +1,6 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
-const { Guest } = require("../models");
+const { Guest, Visit } = require("../models");
 const { Op } = require("sequelize");
 const router = express.Router();
 
@@ -37,59 +37,68 @@ const validateGuest = [
 // GET /api/guests - Get all guests with optional filtering
 router.get("/", async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      status,
-      startDate,
-      endDate,
-      search,
-    } = req.query;
+    const { page = 1, limit = 10, search } = req.query;
 
     const offset = (page - 1) * limit;
-    const where = {};
 
-    // Filter by status
-    if (status) {
-      where.status = status;
-    }
+    const { sequelize } = require("../models");
 
-    // Filter by date range
-    if (startDate || endDate) {
-      where.visitDate = {};
-      if (startDate) {
-        where.visitDate[Op.gte] = new Date(startDate);
-      }
-      if (endDate) {
-        where.visitDate[Op.lte] = new Date(endDate);
-      }
-    }
+    // Build search condition for raw query
+    let searchCondition = "";
+    const replacements = { limit: parseInt(limit), offset: parseInt(offset) };
 
-    // Search functionality
     if (search) {
-      where[Op.or] = [
-        { name: { [Op.iLike]: `%${search}%` } },
-        { email: { [Op.iLike]: `%${search}%` } },
-        { company: { [Op.iLike]: `%${search}%` } },
-      ];
+      searchCondition = `WHERE (g.name ILIKE :search OR g.email ILIKE :search OR g.company ILIKE :search)`;
+      replacements.search = `%${search}%`;
     }
 
-    const { count, rows } = await Guest.findAndCountAll({
-      where,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      order: [["createdAt", "DESC"]],
-    });
+    // Get guests with visit counts using raw query
+    const guestsQuery = `
+      SELECT 
+        g.*,
+        COALESCE(COUNT(v.id), 0) as "totalVisits"
+      FROM "guests" g
+      LEFT JOIN "visits" v ON g.id = v."GuestId"
+      ${searchCondition}
+      GROUP BY g.id
+      ORDER BY g."createdAt" DESC
+      LIMIT :limit OFFSET :offset
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM "guests" g
+      ${searchCondition}
+    `;
+
+    const [guests, countResult] = await Promise.all([
+      sequelize.query(guestsQuery, {
+        replacements,
+        type: sequelize.QueryTypes.SELECT,
+      }),
+      sequelize.query(countQuery, {
+        replacements: search ? { search: `%${search}%` } : {},
+        type: sequelize.QueryTypes.SELECT,
+      }),
+    ]);
+
+    const totalCount = parseInt(countResult[0].total);
+
+    // Convert totalVisits to integer for each guest
+    const formattedGuests = guests.map((guest) => ({
+      ...guest,
+      totalVisits: parseInt(guest.totalVisits),
+    }));
 
     res.json({
       success: true,
       data: {
-        rows: rows,
+        rows: formattedGuests,
         pagination: {
           currentPage: parseInt(page),
-          totalPages: Math.ceil(count / limit),
-          totalCount: count,
-          hasNext: offset + rows.length < count,
+          totalPages: Math.ceil(totalCount / limit),
+          totalCount: totalCount,
+          hasNext: parseInt(offset) + formattedGuests.length < totalCount,
           hasPrev: page > 1,
         },
       },

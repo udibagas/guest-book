@@ -162,7 +162,13 @@ const Reports = () => {
 
   return (
     <div style={{ padding: "24px" }}>
-      <div style={{ marginBottom: 24 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 20,
+        }}
+      >
         <PageTitle level={3}>Laporan Kunjungan</PageTitle>
         <Space>
           <span>Periode:</span>
