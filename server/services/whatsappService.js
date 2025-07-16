@@ -8,9 +8,18 @@ const { Boom } = require("@hapi/boom");
 
 class WhatsAppService {
   constructor() {
+    // Prevent multiple instances (singleton pattern)
+    if (WhatsAppService.instance) {
+      return WhatsAppService.instance;
+    }
+
     this.enabled = true;
     this.sock = null;
     this.isConnected = false;
+    this.isConnecting = false; // Add flag to prevent multiple connection attempts
+
+    // Store the instance
+    WhatsAppService.instance = this;
   }
 
   /**
@@ -75,6 +84,26 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
   }
 
   async connectToWhatsApp() {
+    // If already connected, return existing socket
+    if (this.isConnected && this.sock) {
+      return this.sock;
+    }
+
+    // If currently connecting, wait for it to complete
+    if (this.isConnecting) {
+      console.log("Connection already in progress, waiting...");
+      return new Promise((resolve) => {
+        const checkConnection = setInterval(() => {
+          if (!this.isConnecting) {
+            clearInterval(checkConnection);
+            resolve(this.sock);
+          }
+        }, 500);
+      });
+    }
+
+    this.isConnecting = true;
+
     try {
       const { state, saveCreds } = await useMultiFileAuthState(
         "./wa_auth_info"
@@ -110,6 +139,7 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
 
         if (connection === "close") {
           this.isConnected = false;
+          this.isConnecting = false;
           console.log("WhatsApp connection closed");
 
           if (lastDisconnect?.error) {
@@ -140,6 +170,7 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
         } else if (connection === "open") {
           console.log("Connected to WhatsApp!");
           this.isConnected = true;
+          this.isConnecting = false;
         } else if (connection === "connecting") {
           console.log("Connecting to WhatsApp...");
         }
@@ -153,6 +184,7 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
 
       return sock;
     } catch (error) {
+      this.isConnecting = false;
       console.error("Error creating WhatsApp connection:", error);
       throw error;
     }
@@ -174,15 +206,7 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
         throw new Error("Unable to connect to WhatsApp");
       }
 
-      // Ensure phone number is in the correct format
-      const formattedNumber = recipient.startsWith("+")
-        ? recipient.substring(1)
-        : recipient;
-      const jid = formattedNumber.includes("@")
-        ? formattedNumber
-        : `${formattedNumber}@s.whatsapp.net`;
-
-      await this.sock.sendMessage(jid, { text: message });
+      await this.sock.sendMessage(recipient, { text: message });
       console.log(`WhatsApp message sent to ${recipient}`);
 
       return { success: true, message: "Message sent successfully" };
@@ -259,6 +283,46 @@ Sistem Buku Tamu 📋`;
 
     return await this.sendNotification(phoneNumber, testMessage);
   }
+
+  /**
+   * Get connection status
+   * @returns {Object}
+   */
+  getConnectionStatus() {
+    return {
+      isConnected: this.isConnected,
+      isConnecting: this.isConnecting,
+      enabled: this.enabled,
+      hasSocket: !!this.sock,
+    };
+  }
+
+  /**
+   * Manually disconnect WhatsApp
+   */
+  async disconnect() {
+    if (this.sock) {
+      try {
+        await this.sock.logout();
+        await this.sock.end();
+      } catch (error) {
+        console.error("Error during disconnect:", error);
+      }
+    }
+    this.isConnected = false;
+    this.isConnecting = false;
+    this.sock = null;
+  }
+
+  // Static method to get the singleton instance
+  static getInstance() {
+    if (!WhatsAppService.instance) {
+      WhatsAppService.instance = new WhatsAppService();
+    }
+    return WhatsAppService.instance;
+  }
 }
 
-module.exports = new WhatsAppService();
+// Initialize and export the singleton instance
+WhatsAppService.instance = null;
+module.exports = WhatsAppService.getInstance();
