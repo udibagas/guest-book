@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   Card,
-  Switch,
   Button,
   Input,
   Form,
@@ -13,6 +12,8 @@ import {
   Tag,
   Row,
   Col,
+  Image,
+  Spin,
 } from "antd";
 import {
   WhatsAppOutlined,
@@ -20,6 +21,9 @@ import {
   SettingOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
+  ReloadOutlined,
+  DisconnectOutlined,
+  QrcodeOutlined,
 } from "@ant-design/icons";
 import api from "../../lib/api";
 
@@ -28,15 +32,36 @@ const { Title, Text, Paragraph } = Typography;
 const NotificationSettings = () => {
   const [loading, setLoading] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
+  const [connectLoading, setConnectLoading] = useState(false);
   const [settings, setSettings] = useState({
     whatsappEnabled: false,
     whatsappConfigured: false,
+    connectionStatus: {
+      isConnected: false,
+      isConnecting: false,
+      qrCode: null,
+      needsQR: false,
+    },
   });
   const [form] = Form.useForm();
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+    // Poll for status updates every 3 seconds when connecting or needing QR
+    const interval = setInterval(() => {
+      if (
+        settings.connectionStatus?.isConnecting ||
+        settings.connectionStatus?.needsQR
+      ) {
+        fetchSettings();
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [
+    settings.connectionStatus?.isConnecting,
+    settings.connectionStatus?.needsQR,
+  ]);
 
   const fetchSettings = async () => {
     try {
@@ -69,6 +94,50 @@ const NotificationSettings = () => {
     }
   };
 
+  const connectWhatsApp = async () => {
+    try {
+      setConnectLoading(true);
+      await api.post("/notifications/whatsapp/connect");
+      message.success(
+        "Koneksi WhatsApp dimulai. Silakan scan QR code jika muncul."
+      );
+      fetchSettings();
+    } catch (error) {
+      console.error("Error connecting WhatsApp:", error);
+      message.error("Gagal memulai koneksi WhatsApp");
+    } finally {
+      setConnectLoading(false);
+    }
+  };
+
+  const disconnectWhatsApp = async () => {
+    try {
+      setConnectLoading(true);
+      await api.post("/notifications/whatsapp/disconnect");
+      message.success("WhatsApp berhasil diputus");
+      fetchSettings();
+    } catch (error) {
+      console.error("Error disconnecting WhatsApp:", error);
+      message.error("Gagal memutus koneksi WhatsApp");
+    } finally {
+      setConnectLoading(false);
+    }
+  };
+
+  const reconnectWhatsApp = async () => {
+    try {
+      setConnectLoading(true);
+      await api.post("/notifications/whatsapp/reconnect");
+      message.success("Reconnect WhatsApp dimulai");
+      fetchSettings();
+    } catch (error) {
+      console.error("Error reconnecting WhatsApp:", error);
+      message.error("Gagal reconnect WhatsApp");
+    } finally {
+      setConnectLoading(false);
+    }
+  };
+
   return (
     <div style={{ padding: "24px" }}>
       <Title level={3}>
@@ -93,15 +162,19 @@ const NotificationSettings = () => {
           <Col xs={24} md={12}>
             <Space direction="vertical" style={{ width: "100%" }}>
               <div>
-                <Text strong>Status Konfigurasi:</Text>
+                <Text strong>Status Koneksi:</Text>
                 <br />
-                {settings.whatsappConfigured ? (
+                {settings.connectionStatus?.isConnected ? (
                   <Tag color="success" icon={<CheckCircleOutlined />}>
-                    Terkonfigurasi
+                    Terhubung
+                  </Tag>
+                ) : settings.connectionStatus?.isConnecting ? (
+                  <Tag color="processing" icon={<Spin size="small" />}>
+                    Menghubungkan...
                   </Tag>
                 ) : (
-                  <Tag color="warning" icon={<ExclamationCircleOutlined />}>
-                    Belum Dikonfigurasi
+                  <Tag color="error" icon={<ExclamationCircleOutlined />}>
+                    Terputus
                   </Tag>
                 )}
               </div>
@@ -115,49 +188,117 @@ const NotificationSettings = () => {
                   <Tag color="default">Nonaktif</Tag>
                 )}
               </div>
+
+              <div>
+                <Space>
+                  {!settings.connectionStatus?.isConnected && (
+                    <Button
+                      type="primary"
+                      icon={<WhatsAppOutlined />}
+                      loading={connectLoading}
+                      onClick={connectWhatsApp}
+                    >
+                      Hubungkan WhatsApp
+                    </Button>
+                  )}
+
+                  {settings.connectionStatus?.isConnected && (
+                    <Button
+                      danger
+                      icon={<DisconnectOutlined />}
+                      loading={connectLoading}
+                      onClick={disconnectWhatsApp}
+                    >
+                      Putus Koneksi
+                    </Button>
+                  )}
+
+                  <Button
+                    icon={<ReloadOutlined />}
+                    loading={connectLoading}
+                    onClick={reconnectWhatsApp}
+                  >
+                    Reconnect
+                  </Button>
+                </Space>
+              </div>
             </Space>
           </Col>
 
           <Col xs={24} md={12}>
-            <Alert
-              message="Informasi WhatsApp"
-              description={
-                <div>
-                  <p>• Menggunakan WhatsApp Web melalui library Baileys</p>
-                  <p>
-                    • Notifikasi akan dikirim ke PIC ketika tamu melakukan
-                    registrasi
-                  </p>
-                  <p>
-                    • Memerlukan autentikasi QR Code saat pertama kali setup
-                  </p>
-                  <p>
-                    • Session tersimpan otomatis untuk penggunaan selanjutnya
-                  </p>
-                  <p>
-                    • Pastikan nomor telepon PIC sudah benar dan aktif di
-                    WhatsApp
-                  </p>
+            {settings.connectionStatus?.qrCode ? (
+              <Card
+                title={
+                  <Space>
+                    <QrcodeOutlined />
+                    Scan QR Code untuk Login
+                  </Space>
+                }
+                size="small"
+              >
+                <div style={{ textAlign: "center" }}>
+                  <Image
+                    src={settings.connectionStatus.qrCode}
+                    width={200}
+                    height={200}
+                    style={{ border: "1px solid #d9d9d9", borderRadius: 8 }}
+                    preview={false}
+                  />
+                  <div style={{ marginTop: 16 }}>
+                    <Text type="secondary">
+                      1. Buka WhatsApp di ponsel
+                      <br />
+                      2. Tap Menu (⋮) → Linked Devices
+                      <br />
+                      3. Tap 'Link a Device'
+                      <br />
+                      4. Scan QR code di atas
+                    </Text>
+                  </div>
                 </div>
-              }
-              type="info"
-              showIcon
-            />
+              </Card>
+            ) : (
+              <Alert
+                message="Informasi WhatsApp"
+                description={
+                  <div>
+                    <p>• Menggunakan WhatsApp Web melalui library Baileys</p>
+                    <p>
+                      • Notifikasi akan dikirim ke PIC ketika tamu melakukan
+                      registrasi
+                    </p>
+                    <p>
+                      • Memerlukan autentikasi QR Code saat pertama kali setup
+                    </p>
+                    <p>
+                      • Session tersimpan otomatis untuk penggunaan selanjutnya
+                    </p>
+                    <p>
+                      • Pastikan nomor telepon PIC sudah benar dan aktif di
+                      WhatsApp
+                    </p>
+                  </div>
+                }
+                type="info"
+                showIcon
+              />
+            )}
           </Col>
         </Row>
 
-        {!settings.whatsappConfigured && (
-          <>
-            <Divider />
-            <Alert
-              message="Autentikasi QR Code Diperlukan"
-              description="WhatsApp belum terautentikasi. Jalankan server dan scan QR Code yang muncul di terminal untuk menghubungkan WhatsApp Web."
-              type="warning"
-              showIcon
-              style={{ marginTop: 16 }}
-            />
-          </>
-        )}
+        {!settings.connectionStatus?.isConnected &&
+          !settings.connectionStatus?.qrCode && (
+            <>
+              <Divider />
+              <Alert
+                message="WhatsApp Belum Terhubung"
+                description="Klik tombol 'Hubungkan WhatsApp' untuk memulai proses koneksi. QR Code akan muncul untuk di-scan."
+                type="warning"
+                showIcon
+                style={{ marginTop: 16 }}
+              />
+            </>
+          )}
       </Card>
 
       {/* Test Notification */}
@@ -174,7 +315,7 @@ const NotificationSettings = () => {
           form={form}
           layout="vertical"
           onFinish={sendTestNotification}
-          disabled={!settings.whatsappConfigured}
+          disabled={!settings.connectionStatus?.isConnected}
         >
           <Row gutter={[16, 0]}>
             <Col xs={24} md={12}>
@@ -204,7 +345,7 @@ const NotificationSettings = () => {
                   type="primary"
                   htmlType="submit"
                   loading={testLoading}
-                  disabled={!settings.whatsappConfigured}
+                  disabled={!settings.connectionStatus?.isConnected}
                   icon={<SendOutlined />}
                 >
                   Kirim Test Notifikasi
@@ -214,10 +355,10 @@ const NotificationSettings = () => {
           </Row>
         </Form>
 
-        {!settings.whatsappConfigured && (
+        {!settings.connectionStatus?.isConnected && (
           <Alert
             message="Test notifikasi tidak tersedia"
-            description="Autentikasi WhatsApp QR Code diperlukan untuk mengirim test notifikasi."
+            description="WhatsApp harus terhubung terlebih dahulu untuk mengirim test notifikasi."
             type="info"
             showIcon
           />
@@ -226,75 +367,29 @@ const NotificationSettings = () => {
 
       {/* Information Card */}
       <Card title="Cara Kerja Notifikasi">
-        <div>
-          <Title level={5}>📱 Notifikasi WhatsApp</Title>
-          <Paragraph>
-            <ol>
-              <li>
-                <strong>Registrasi Tamu:</strong> Ketika tamu melakukan
-                registrasi dan memilih PIC, sistem akan otomatis mengirim
-                notifikasi WhatsApp ke nomor telepon PIC yang terdaftar.
-              </li>
-              <li>
-                <strong>Informasi yang Dikirim:</strong>
-                <ul>
-                  <li>Data lengkap tamu (nama, telepon, email, perusahaan)</li>
-                  <li>Tujuan kunjungan</li>
-                  <li>Waktu kunjungan</li>
-                  <li>Catatan tambahan (jika ada)</li>
-                </ul>
-              </li>
-              <li>
-                <strong>Syarat:</strong> PIC harus memiliki nomor telepon yang
-                valid dan aktif di WhatsApp. Sistem harus sudah terautentikasi
-                melalui QR Code.
-              </li>
-            </ol>
-          </Paragraph>
-
-          <Title level={5}>⚙️ Konfigurasi</Title>
-          <Paragraph>
-            Sistem menggunakan WhatsApp Web melalui library Baileys yang
-            memerlukan autentikasi QR Code:
-          </Paragraph>
-          <div
-            style={{ backgroundColor: "#f5f5f5", padding: 16, borderRadius: 4 }}
-          >
-            <Text strong>Langkah-langkah setup:</Text>
-            <ol style={{ marginTop: 8, marginBottom: 0 }}>
-              <li>Jalankan server backend</li>
-              <li>
-                Scan QR Code yang muncul di terminal dengan WhatsApp di ponsel
-              </li>
-              <li>
-                Setelah berhasil login, sistem akan otomatis menyimpan session
-              </li>
-              <li>Notifikasi WhatsApp siap digunakan</li>
-            </ol>
-          </div>
-          <Alert
-            message="Catatan Penting"
-            description={
-              <div>
-                <p>
-                  • Session WhatsApp akan tersimpan di folder{" "}
-                  <code>./wa_auth_info</code>
-                </p>
-                <p>
-                  • Jika session berakhir, scan ulang QR Code yang muncul di
-                  terminal
-                </p>
-                <p>
-                  • Pastikan nomor WhatsApp yang digunakan untuk login dapat
-                  mengirim pesan ke nomor PIC
-                </p>
-              </div>
-            }
-            type="info"
-            showIcon
-            style={{ marginTop: 16 }}
-          />
-        </div>
+        <Paragraph>
+          <ol>
+            <li>
+              <strong>Registrasi Tamu:</strong> Ketika tamu melakukan registrasi
+              dan memilih PIC, sistem akan otomatis mengirim notifikasi WhatsApp
+              ke nomor telepon PIC yang terdaftar.
+            </li>
+            <li>
+              <strong>Informasi yang Dikirim:</strong>
+              <ul>
+                <li>Data lengkap tamu (nama, telepon, email, perusahaan)</li>
+                <li>Tujuan kunjungan</li>
+                <li>Waktu kunjungan</li>
+                <li>Catatan tambahan (jika ada)</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Syarat:</strong> PIC harus memiliki nomor telepon yang
+              valid dan aktif di WhatsApp. Sistem harus sudah terautentikasi
+              melalui QR Code.
+            </li>
+          </ol>
+        </Paragraph>
       </Card>
     </div>
   );

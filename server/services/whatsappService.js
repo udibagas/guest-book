@@ -4,6 +4,7 @@ const {
   useMultiFileAuthState,
 } = require("@whiskeysockets/baileys");
 const qrCodeTerminal = require("qrcode-terminal");
+const QRCode = require("qrcode");
 const { Boom } = require("@hapi/boom");
 
 class WhatsAppService {
@@ -17,6 +18,8 @@ class WhatsAppService {
     this.sock = null;
     this.isConnected = false;
     this.isConnecting = false; // Add flag to prevent multiple connection attempts
+    this.currentQR = null; // Store current QR code
+    this.qrDataURL = null; // Store QR code as data URL for web display
 
     // Store the instance
     WhatsAppService.instance = this;
@@ -130,8 +133,22 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
           console.log("1. Buka WhatsApp di ponsel");
           console.log("2. Tap Menu (⋮) > Linked Devices");
           console.log("3. Tap 'Link a Device'");
-          console.log("4. Scan QR code di bawah ini:\n");
+          console.log("4. Scan QR code di bawah ini atau di web interface:\n");
 
+          // Store QR code for web display
+          this.currentQR = qr;
+
+          // Generate QR code as data URL for web
+          QRCode.toDataURL(qr, { width: 256 })
+            .then((dataURL) => {
+              this.qrDataURL = dataURL;
+              console.log("QR Code generated for web interface");
+            })
+            .catch((err) => {
+              console.error("Error generating QR code for web:", err);
+            });
+
+          // Still show in terminal for fallback
           qrCodeTerminal.generate(qr, { small: true });
 
           console.log("\n=== QR CODE UNTUK WHATSAPP ===\n");
@@ -140,6 +157,8 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
         if (connection === "close") {
           this.isConnected = false;
           this.isConnecting = false;
+          this.currentQR = null;
+          this.qrDataURL = null;
           console.log("WhatsApp connection closed");
 
           if (lastDisconnect?.error) {
@@ -171,6 +190,8 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
           console.log("Connected to WhatsApp!");
           this.isConnected = true;
           this.isConnecting = false;
+          this.currentQR = null;
+          this.qrDataURL = null;
         } else if (connection === "connecting") {
           console.log("Connecting to WhatsApp...");
         }
@@ -294,6 +315,8 @@ Sistem Buku Tamu 📋`;
       isConnecting: this.isConnecting,
       enabled: this.enabled,
       hasSocket: !!this.sock,
+      qrCode: this.qrDataURL,
+      needsQR: !this.isConnected && !this.isConnecting && this.currentQR,
     };
   }
 
@@ -312,6 +335,16 @@ Sistem Buku Tamu 📋`;
     this.isConnected = false;
     this.isConnecting = false;
     this.sock = null;
+    this.currentQR = null;
+    this.qrDataURL = null;
+  }
+
+  /**
+   * Force reconnection (useful for web interface)
+   */
+  async forceReconnect() {
+    await this.disconnect();
+    return await this.connectToWhatsApp();
   }
 
   // Static method to get the singleton instance

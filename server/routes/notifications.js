@@ -5,11 +5,12 @@ const router = express.Router();
 // GET /api/notifications/settings - Get current notification settings
 router.get("/settings", async (req, res) => {
   try {
+    const whatsappStatus = whatsappService.getConnectionStatus();
+
     const settings = {
-      whatsappEnabled: process.env.WHATSAPP_NOTIFICATIONS_ENABLED === "true",
-      whatsappConfigured: !!(
-        process.env.WHATSAPP_API_TOKEN && process.env.WHATSAPP_API_URL
-      ),
+      whatsappEnabled: whatsappStatus.enabled,
+      whatsappConfigured: whatsappStatus.isConnected,
+      connectionStatus: whatsappStatus,
     };
 
     res.json({
@@ -135,6 +136,85 @@ router.post("/guest-registered", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error sending notification",
+      error: error.message,
+    });
+  }
+});
+
+// GET /api/notifications/whatsapp/status - Get WhatsApp connection status
+router.get("/whatsapp/status", async (req, res) => {
+  try {
+    const status = whatsappService.getConnectionStatus();
+    res.json({
+      success: true,
+      data: status,
+    });
+  } catch (error) {
+    console.error("Error getting WhatsApp status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error getting WhatsApp status",
+      error: error.message,
+    });
+  }
+});
+
+// POST /api/notifications/whatsapp/connect - Initiate WhatsApp connection
+router.post("/whatsapp/connect", async (req, res) => {
+  try {
+    await whatsappService.connectToWhatsApp();
+    const status = whatsappService.getConnectionStatus();
+
+    res.json({
+      success: true,
+      message: "WhatsApp connection initiated",
+      data: status,
+    });
+  } catch (error) {
+    console.error("Error connecting to WhatsApp:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error connecting to WhatsApp",
+      error: error.message,
+    });
+  }
+});
+
+// POST /api/notifications/whatsapp/disconnect - Disconnect WhatsApp
+router.post("/whatsapp/disconnect", async (req, res) => {
+  try {
+    await whatsappService.disconnect();
+
+    res.json({
+      success: true,
+      message: "WhatsApp disconnected successfully",
+    });
+  } catch (error) {
+    console.error("Error disconnecting WhatsApp:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error disconnecting WhatsApp",
+      error: error.message,
+    });
+  }
+});
+
+// POST /api/notifications/whatsapp/reconnect - Force reconnect WhatsApp
+router.post("/whatsapp/reconnect", async (req, res) => {
+  try {
+    await whatsappService.forceReconnect();
+    const status = whatsappService.getConnectionStatus();
+
+    res.json({
+      success: true,
+      message: "WhatsApp reconnection initiated",
+      data: status,
+    });
+  } catch (error) {
+    console.error("Error reconnecting WhatsApp:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error reconnecting WhatsApp",
       error: error.message,
     });
   }
