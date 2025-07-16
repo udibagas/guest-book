@@ -76,4 +76,5 @@ Thumbs.db
 *.db
 
 # Whatsapp session files
-/server/wa_auth_info/
+/server/wa_auth_info/*
+!/server/wa_auth_info/.gitkeep
