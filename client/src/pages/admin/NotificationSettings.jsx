@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   Card,
   Button,
@@ -12,7 +11,6 @@ import {
   Tag,
   Row,
   Col,
-  Image,
   Spin,
 } from "antd";
 import {
@@ -25,117 +23,152 @@ import {
   DisconnectOutlined,
   QrcodeOutlined,
 } from "@ant-design/icons";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../lib/api";
 
 const { Title, Text, Paragraph } = Typography;
 
 const NotificationSettings = () => {
-  const [loading, setLoading] = useState(false);
-  const [testLoading, setTestLoading] = useState(false);
-  const [connectLoading, setConnectLoading] = useState(false);
-  const [settings, setSettings] = useState({
-    whatsappEnabled: false,
-    whatsappConfigured: false,
-    connectionStatus: {
-      isConnected: false,
-      isConnecting: false,
-      qrCode: null,
-      needsQR: false,
-    },
-  });
+  const queryClient = useQueryClient();
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    fetchSettings();
-    // Poll for status updates every 3 seconds when connecting or needing QR
-    const interval = setInterval(() => {
-      if (
-        settings.connectionStatus?.isConnecting ||
-        settings.connectionStatus?.needsQR
-      ) {
-        fetchSettings();
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [
-    settings.connectionStatus?.isConnecting,
-    settings.connectionStatus?.needsQR,
-  ]);
-
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
+  // Query for notification settings with auto-refresh for QR codes
+  const {
+    data: settings = {
+      whatsappEnabled: false,
+      whatsappConfigured: false,
+      connectionStatus: {
+        isConnected: false,
+        isConnecting: false,
+        qrCode: null,
+        needsQR: false,
+      },
+    },
+    isLoading,
+  } = useQuery({
+    queryKey: ["notificationSettings"],
+    queryFn: async () => {
       const response = await api.get("/notifications/settings");
-      setSettings(response.data.data);
-    } catch (error) {
-      console.error("Error fetching settings:", error);
-      message.error("Gagal memuat pengaturan notifikasi");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return response.data.data;
+    },
+    refetchInterval: (data) => {
+      // Auto-refresh every 3 seconds if connecting or waiting for QR
+      if (
+        data?.connectionStatus?.isConnecting ||
+        data?.connectionStatus?.qrCode
+      ) {
+        return 3000;
+      }
+      // Otherwise, refresh every 30 seconds
+      return 30000;
+    },
+    refetchIntervalInBackground: true,
+    staleTime: 0, // Always consider data stale for real-time updates
+  });
 
-  const sendTestNotification = async (values) => {
-    try {
-      setTestLoading(true);
-      await api.post("/notifications/test", {
-        phoneNumber: values.testPhoneNumber,
-      });
+  // Mutation for sending test notifications
+  const testNotificationMutation = useMutation({
+    mutationFn: async (phoneNumber) => {
+      const response = await api.post("/notifications/test", { phoneNumber });
+      return response.data;
+    },
+    onSuccess: () => {
       message.success("Notifikasi test berhasil dikirim!");
       form.resetFields();
-    } catch (error) {
-      console.error("Error sending test notification:", error);
+    },
+    onError: (error) => {
       message.error(
         error.response?.data?.message || "Gagal mengirim notifikasi test"
       );
-    } finally {
-      setTestLoading(false);
-    }
-  };
+    },
+  });
 
-  const connectWhatsApp = async () => {
-    try {
-      setConnectLoading(true);
-      await api.post("/notifications/whatsapp/connect");
+  // Mutation for connecting WhatsApp
+  const connectMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post("/notifications/whatsapp/connect");
+      return response.data;
+    },
+    onSuccess: () => {
       message.success(
         "Koneksi WhatsApp dimulai. Silakan scan QR code jika muncul."
       );
-      fetchSettings();
-    } catch (error) {
-      console.error("Error connecting WhatsApp:", error);
+      queryClient.invalidateQueries(["notificationSettings"]);
+    },
+    onError: (error) => {
       message.error("Gagal memulai koneksi WhatsApp");
-    } finally {
-      setConnectLoading(false);
-    }
-  };
+      console.error("Error connecting WhatsApp:", error);
+    },
+  });
 
-  const disconnectWhatsApp = async () => {
-    try {
-      setConnectLoading(true);
-      await api.post("/notifications/whatsapp/disconnect");
+  // Mutation for disconnecting WhatsApp
+  const disconnectMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post("/notifications/whatsapp/disconnect");
+      return response.data;
+    },
+    onSuccess: () => {
       message.success("WhatsApp berhasil diputus");
-      fetchSettings();
-    } catch (error) {
-      console.error("Error disconnecting WhatsApp:", error);
+      queryClient.invalidateQueries(["notificationSettings"]);
+    },
+    onError: (error) => {
       message.error("Gagal memutus koneksi WhatsApp");
-    } finally {
-      setConnectLoading(false);
-    }
+      console.error("Error disconnecting WhatsApp:", error);
+    },
+  });
+
+  // Mutation for reconnecting WhatsApp
+  const reconnectMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post("/notifications/whatsapp/reconnect");
+      return response.data;
+    },
+    onSuccess: () => {
+      message.success("Reconnect WhatsApp dimulai");
+      queryClient.invalidateQueries(["notificationSettings"]);
+    },
+    onError: (error) => {
+      message.error("Gagal reconnect WhatsApp");
+      console.error("Error reconnecting WhatsApp:", error);
+    },
+  });
+
+  // Mutation for clearing session
+  const clearSessionMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post("/notifications/whatsapp/clear-session");
+      return response.data;
+    },
+    onSuccess: () => {
+      message.success(
+        "Session WhatsApp berhasil dihapus. Silakan hubungkan ulang dengan QR code baru."
+      );
+      queryClient.invalidateQueries(["notificationSettings"]);
+    },
+    onError: (error) => {
+      message.error("Gagal menghapus session WhatsApp");
+      console.error("Error clearing WhatsApp session:", error);
+    },
+  });
+
+  const sendTestNotification = async (values) => {
+    testNotificationMutation.mutate(values.testPhoneNumber);
   };
 
-  const reconnectWhatsApp = async () => {
-    try {
-      setConnectLoading(true);
-      await api.post("/notifications/whatsapp/reconnect");
-      message.success("Reconnect WhatsApp dimulai");
-      fetchSettings();
-    } catch (error) {
-      console.error("Error reconnecting WhatsApp:", error);
-      message.error("Gagal reconnect WhatsApp");
-    } finally {
-      setConnectLoading(false);
-    }
+  const connectWhatsApp = () => {
+    connectMutation.mutate();
+  };
+
+  const disconnectWhatsApp = () => {
+    disconnectMutation.mutate();
+  };
+
+  const reconnectWhatsApp = () => {
+    reconnectMutation.mutate();
+  };
+
+  const clearWhatsAppSession = () => {
+    clearSessionMutation.mutate();
   };
 
   return (
@@ -155,7 +188,7 @@ const NotificationSettings = () => {
             WhatsApp Notifications
           </Space>
         }
-        loading={loading}
+        loading={isLoading}
         style={{ marginBottom: 24 }}
       >
         <Row gutter={[24, 16]}>
@@ -195,7 +228,7 @@ const NotificationSettings = () => {
                     <Button
                       type="primary"
                       icon={<WhatsAppOutlined />}
-                      loading={connectLoading}
+                      loading={connectMutation.isPending}
                       onClick={connectWhatsApp}
                     >
                       Hubungkan WhatsApp
@@ -206,7 +239,7 @@ const NotificationSettings = () => {
                     <Button
                       danger
                       icon={<DisconnectOutlined />}
-                      loading={connectLoading}
+                      loading={disconnectMutation.isPending}
                       onClick={disconnectWhatsApp}
                     >
                       Putus Koneksi
@@ -215,10 +248,19 @@ const NotificationSettings = () => {
 
                   <Button
                     icon={<ReloadOutlined />}
-                    loading={connectLoading}
+                    loading={reconnectMutation.isPending}
                     onClick={reconnectWhatsApp}
                   >
                     Reconnect
+                  </Button>
+
+                  <Button
+                    type="default"
+                    danger
+                    loading={clearSessionMutation.isPending}
+                    onClick={clearWhatsAppSession}
+                  >
+                    Clear Session
                   </Button>
                 </Space>
               </div>
@@ -237,12 +279,14 @@ const NotificationSettings = () => {
                 size="small"
               >
                 <div style={{ textAlign: "center" }}>
-                  <Image
+                  <img
                     src={settings.connectionStatus.qrCode}
-                    width={200}
-                    height={200}
-                    style={{ border: "1px solid #d9d9d9", borderRadius: 8 }}
-                    preview={false}
+                    style={{
+                      border: "1px solid #d9d9d9",
+                      borderRadius: 8,
+                      width: 200,
+                      height: 200,
+                    }}
                   />
                   <div style={{ marginTop: 16 }}>
                     <Text type="secondary">
@@ -344,7 +388,7 @@ const NotificationSettings = () => {
                 <Button
                   type="primary"
                   htmlType="submit"
-                  loading={testLoading}
+                  loading={testNotificationMutation.isPending}
                   disabled={!settings.connectionStatus?.isConnected}
                   icon={<SendOutlined />}
                 >

@@ -220,4 +220,24 @@ router.post("/whatsapp/reconnect", async (req, res) => {
   }
 });
 
+// POST /api/notifications/whatsapp/clear-session - Clear saved session
+router.post("/whatsapp/clear-session", async (req, res) => {
+  try {
+    await whatsappService.disconnect(true); // Disconnect and clear session
+
+    res.json({
+      success: true,
+      message:
+        "WhatsApp session cleared successfully. Please reconnect with new QR code.",
+    });
+  } catch (error) {
+    console.error("Error clearing WhatsApp session:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error clearing WhatsApp session",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

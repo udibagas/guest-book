@@ -173,7 +173,9 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
             );
 
             if (statusCode === DisconnectReason.loggedOut) {
-              console.log("Device logged out. Please scan QR code again.");
+              console.log("Device logged out. Clearing saved session...");
+              // Clear the saved session when logged out
+              this.clearAuthSession();
               return;
             }
 
@@ -256,7 +258,7 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
 
     try {
       const formattedNumber = this.formatPhoneNumber(phoneNumber);
-      await this.sendTextMessage(formattedNumber, message);
+      return await this.sendTextMessage(formattedNumber, message);
     } catch (error) {
       console.error("Error sending WhatsApp notification:", error);
       return false;
@@ -322,8 +324,9 @@ Sistem Buku Tamu 📋`;
 
   /**
    * Manually disconnect WhatsApp
+   * @param {boolean} clearSession - Whether to clear saved session data
    */
-  async disconnect() {
+  async disconnect(clearSession = false) {
     if (this.sock) {
       try {
         await this.sock.logout();
@@ -337,6 +340,10 @@ Sistem Buku Tamu 📋`;
     this.sock = null;
     this.currentQR = null;
     this.qrDataURL = null;
+
+    if (clearSession) {
+      this.clearAuthSession();
+    }
   }
 
   /**
@@ -345,6 +352,32 @@ Sistem Buku Tamu 📋`;
   async forceReconnect() {
     await this.disconnect();
     return await this.connectToWhatsApp();
+  }
+
+  /**
+   * Clear saved authentication session
+   */
+  clearAuthSession() {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const authPath = "./wa_auth_info";
+
+      // Check if auth directory exists
+      if (fs.existsSync(authPath)) {
+        // Remove all files in the auth directory
+        const files = fs.readdirSync(authPath);
+        for (const file of files) {
+          const filePath = path.join(authPath, file);
+          fs.unlinkSync(filePath);
+          console.log(`Removed auth file: ${file}`);
+        }
+
+        console.log("Auth session cleared successfully");
+      }
+    } catch (error) {
+      console.error("Error clearing auth session:", error);
+    }
   }
 
   // Static method to get the singleton instance
