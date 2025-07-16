@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "nodemon --ignore wa_auth_info/ index.js",
     "db:create": "npx sequelize-cli db:create",
     "db:drop": "npx sequelize-cli db:drop",
     "db:migrate": "npx sequelize-cli db:migrate",

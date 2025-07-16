@@ -123,14 +123,20 @@ const NotificationSettings = () => {
               message="Informasi WhatsApp"
               description={
                 <div>
+                  <p>• Menggunakan WhatsApp Web melalui library Baileys</p>
                   <p>
                     • Notifikasi akan dikirim ke PIC ketika tamu melakukan
                     registrasi
                   </p>
-                  <p>• Pastikan nomor telepon PIC sudah benar dan aktif</p>
                   <p>
-                    • Untuk mengaktifkan, hubungi administrator sistem untuk
-                    konfigurasi API
+                    • Memerlukan autentikasi QR Code saat pertama kali setup
+                  </p>
+                  <p>
+                    • Session tersimpan otomatis untuk penggunaan selanjutnya
+                  </p>
+                  <p>
+                    • Pastikan nomor telepon PIC sudah benar dan aktif di
+                    WhatsApp
                   </p>
                 </div>
               }
@@ -144,8 +150,8 @@ const NotificationSettings = () => {
           <>
             <Divider />
             <Alert
-              message="Konfigurasi Diperlukan"
-              description="WhatsApp API belum dikonfigurasi. Hubungi administrator sistem untuk mengatur WHATSAPP_API_TOKEN dan WHATSAPP_API_URL di environment variables."
+              message="Autentikasi QR Code Diperlukan"
+              description="WhatsApp belum terautentikasi. Jalankan server dan scan QR Code yang muncul di terminal untuk menghubungkan WhatsApp Web."
               type="warning"
               showIcon
               style={{ marginTop: 16 }}
@@ -211,7 +217,7 @@ const NotificationSettings = () => {
         {!settings.whatsappConfigured && (
           <Alert
             message="Test notifikasi tidak tersedia"
-            description="Konfigurasi WhatsApp API diperlukan untuk mengirim test notifikasi."
+            description="Autentikasi WhatsApp QR Code diperlukan untuk mengirim test notifikasi."
             type="info"
             showIcon
           />
@@ -240,27 +246,54 @@ const NotificationSettings = () => {
               </li>
               <li>
                 <strong>Syarat:</strong> PIC harus memiliki nomor telepon yang
-                valid dan sistem WhatsApp API harus dikonfigurasi dengan benar.
+                valid dan aktif di WhatsApp. Sistem harus sudah terautentikasi
+                melalui QR Code.
               </li>
             </ol>
           </Paragraph>
 
           <Title level={5}>⚙️ Konfigurasi</Title>
           <Paragraph>
-            Untuk mengaktifkan notifikasi WhatsApp, administrator perlu mengatur
-            variabel environment berikut:
+            Sistem menggunakan WhatsApp Web melalui library Baileys yang
+            memerlukan autentikasi QR Code:
           </Paragraph>
           <div
             style={{ backgroundColor: "#f5f5f5", padding: 16, borderRadius: 4 }}
           >
-            <code>
-              WHATSAPP_NOTIFICATIONS_ENABLED=true
-              <br />
-              WHATSAPP_API_URL=https://graph.facebook.com/v17.0/YOUR_PHONE_NUMBER_ID
-              <br />
-              WHATSAPP_API_TOKEN=your_whatsapp_api_token
-            </code>
+            <Text strong>Langkah-langkah setup:</Text>
+            <ol style={{ marginTop: 8, marginBottom: 0 }}>
+              <li>Jalankan server backend</li>
+              <li>
+                Scan QR Code yang muncul di terminal dengan WhatsApp di ponsel
+              </li>
+              <li>
+                Setelah berhasil login, sistem akan otomatis menyimpan session
+              </li>
+              <li>Notifikasi WhatsApp siap digunakan</li>
+            </ol>
           </div>
+          <Alert
+            message="Catatan Penting"
+            description={
+              <div>
+                <p>
+                  • Session WhatsApp akan tersimpan di folder{" "}
+                  <code>./wa_auth_info</code>
+                </p>
+                <p>
+                  • Jika session berakhir, scan ulang QR Code yang muncul di
+                  terminal
+                </p>
+                <p>
+                  • Pastikan nomor WhatsApp yang digunakan untuk login dapat
+                  mengirim pesan ke nomor PIC
+                </p>
+              </div>
+            }
+            type="info"
+            showIcon
+            style={{ marginTop: 16 }}
+          />
         </div>
       </Card>
     </div>

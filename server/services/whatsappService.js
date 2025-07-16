@@ -84,39 +84,59 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
       const sock = makeWASocket({
         printQRInTerminal: false,
         auth: state,
-        qrTimeoutMs: 60_000, // Set QR code timeout to 60 seconds
         logger: require("pino")({ level: "silent" }), // Silent logging to reduce noise
+        browser: ["Guest Book System", "Chrome", "1.0.0"],
+        generateHighQualityLinkPreview: true,
       });
 
       console.log("WhatsApp socket created, waiting for connection...");
-
-      // if (!sock.authState.creds.registered) {
-      //   const number = "+6285848909262";
-      //   const code = await sock.requestPairingCode(number);
-      //   console.log(code);
-      // }
 
       // Handle connection updates
       sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect, qr } = update;
 
         if (qr) {
-          console.log("QR Code received, scan it to authenticate");
+          console.log("\n=== QR CODE UNTUK WHATSAPP ===");
+          console.log("Scan QR code ini dengan WhatsApp di ponsel Anda:");
+          console.log("1. Buka WhatsApp di ponsel");
+          console.log("2. Tap Menu (⋮) > Linked Devices");
+          console.log("3. Tap 'Link a Device'");
+          console.log("4. Scan QR code di bawah ini:\n");
+
           qrCodeTerminal.generate(qr, { small: true });
+
+          console.log("\n=== QR CODE UNTUK WHATSAPP ===\n");
         }
 
         if (connection === "close") {
           this.isConnected = false;
-          const shouldReconnect =
-            (lastDisconnect?.error instanceof Boom)?.output?.statusCode !==
-            DisconnectReason.loggedOut;
+          console.log("WhatsApp connection closed");
 
-          console.log("Connection closed due to:", lastDisconnect?.error);
+          if (lastDisconnect?.error) {
+            const statusCode =
+              lastDisconnect.error instanceof Boom
+                ? lastDisconnect.error.output?.statusCode
+                : null;
 
-          if (shouldReconnect) {
-            console.log("Attempting to reconnect...");
-            setTimeout(() => this.connectToWhatsApp(), 3000);
+            console.log(
+              "Disconnect reason:",
+              lastDisconnect.error.message || lastDisconnect.error
+            );
+
+            if (statusCode === DisconnectReason.loggedOut) {
+              console.log("Device logged out. Please scan QR code again.");
+              return;
+            }
+
+            if (statusCode === DisconnectReason.restartRequired) {
+              console.log("Restart required. Reconnecting...");
+              setTimeout(() => this.connectToWhatsApp(), 5000);
+              return;
+            }
           }
+
+          console.log("Attempting to reconnect in 5 seconds...");
+          setTimeout(() => this.connectToWhatsApp(), 5000);
         } else if (connection === "open") {
           console.log("Connected to WhatsApp!");
           this.isConnected = true;
