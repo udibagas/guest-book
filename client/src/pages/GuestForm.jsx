@@ -65,8 +65,9 @@ const GuestForm = () => {
     setShowCustomPurpose(purpose && purpose.name === "Other");
   };
 
-  const handlePhoneNumberChange = async (e) => {
-    const phoneNumber = e.target.value;
+  const handleIdentityChange = async (e) => {
+    const target = e.target.name;
+    const identity = e.target.value;
 
     // Clear previous timeout
     if (searchTimeout) {
@@ -74,24 +75,30 @@ const GuestForm = () => {
     }
 
     // Only search if phone number has at least 10 digits
-    if (phoneNumber && phoneNumber.replace(/[^0-9]/g, "").length >= 10) {
+    if (identity && identity.replace(/[^0-9]/g, "").length >= 10) {
       // Debounce the search to avoid too many API calls
       const timeout = setTimeout(async () => {
         try {
-          const response = await api.get(`/guests/search?query=${phoneNumber}`);
+          const { data: guest } = await api.get(
+            `/guests/search?query=${identity}`
+          );
 
-          if (response.data) {
-            const guest = response.data;
+          // Pre-fill form fields with existing guest data
+          form.setFieldsValue({
+            email: guest.email || "",
+            company: guest.company || "",
+            role: guest.role || "",
+          });
 
-            // Pre-fill form fields with existing guest data
-            form.setFieldsValue({
-              email: guest.email || "",
-              company: guest.company || "",
-              role: guest.role || "",
-            });
-
-            message.success("Data tamu ditemukan dan telah diisi otomatis");
+          if (target === "idNumber") {
+            form.setFieldValue("phoneNumber", guest.phoneNumber || "");
           }
+
+          if (target === "phoneNumber") {
+            form.setFieldValue("idNumber", guest.idNumber || "");
+          }
+
+          message.success("Data tamu ditemukan dan telah diisi otomatis");
         } catch (error) {
           // Silent fail - don't show error to user as this is just a convenience feature
           console.log("Guest search failed:", error);
@@ -181,6 +188,9 @@ const GuestForm = () => {
             <Input
               prefix={<IdcardOutlined />}
               placeholder="Masukkan nomor KTP/SIM (opsional)"
+              onChange={handleIdentityChange}
+              onBlur={handleIdentityChange}
+              name="idNumber"
             />
           </Form.Item>
         </Col>
@@ -206,8 +216,9 @@ const GuestForm = () => {
             <Input
               prefix={<PhoneOutlined />}
               placeholder="Masukkan nomor telepon Anda"
-              onChange={handlePhoneNumberChange}
-              onBlur={handlePhoneNumberChange}
+              onChange={handleIdentityChange}
+              onBlur={handleIdentityChange}
+              name="phoneNumber"
             />
           </Form.Item>
         </Col>

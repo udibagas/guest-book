@@ -125,7 +125,12 @@ router.get("/search", async (req, res) => {
     }
 
     const guest = await Guest.findOne({
-      where: { phoneNumber: { [Op.iLike]: `%${query}%` } },
+      where: {
+        [Op.or]: {
+          idNumber: { [Op.iLike]: `%${query}%` },
+          phoneNumber: { [Op.iLike]: `%${query}%` },
+        },
+      },
     });
 
     if (!guest) {

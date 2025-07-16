@@ -62,9 +62,10 @@ const Guests = () => {
       key: "name",
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      title: "Nomor Identitas",
+      dataIndex: "idNumber",
+      key: "idNumber",
+      render: (idNumber) => idNumber || "-",
     },
     {
       title: "Nomor Telepon",
@@ -72,10 +73,9 @@ const Guests = () => {
       key: "phoneNumber",
     },
     {
-      title: "Nomor Identitas",
-      dataIndex: "idNumber",
-      key: "idNumber",
-      render: (idNumber) => idNumber || "-",
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
     },
     {
       title: "Perusahaan",
@@ -175,14 +175,14 @@ const Guests = () => {
             <Descriptions.Item label="Nama">
               {selectedGuest.name}
             </Descriptions.Item>
-            <Descriptions.Item label="Email">
-              {selectedGuest.email || "-"}
+            <Descriptions.Item label="Nomor Identitas">
+              {selectedGuest.idNumber || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Nomor Telepon">
               {selectedGuest.phoneNumber}
             </Descriptions.Item>
-            <Descriptions.Item label="Nomor Identitas">
-              {selectedGuest.idNumber || "-"}
+            <Descriptions.Item label="Email">
+              {selectedGuest.email || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Perusahaan">
               {selectedGuest.company || "-"}
@@ -193,7 +193,9 @@ const Guests = () => {
             <Descriptions.Item label="Foto ID">
               {selectedGuest.idPhotoPath ? (
                 <Image
-                  src={selectedGuest.idPhotoPath}
+                  src={`${import.meta.env.VITE_API_URL || ""}${
+                    selectedGuest.idPhotoPath
+                  }`}
                   alt="ID Photo"
                   style={{ maxWidth: "200px", maxHeight: "150px" }}
                 />
