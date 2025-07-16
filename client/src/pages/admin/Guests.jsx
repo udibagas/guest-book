@@ -125,7 +125,7 @@ const Guests = () => {
               placeholder="Cari berdasarkan nama, email, perusahaan, atau nomor identitas"
               allowClear
               onSearch={handleSearch}
-              style={{ width: 450 }}
+              style={{ width: 500 }}
             />
             <Button
               icon={<ReloadOutlined />}

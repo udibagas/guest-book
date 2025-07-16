@@ -25,6 +25,7 @@ import {
   MenuFoldOutlined,
   UsergroupAddOutlined,
   BarChartOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate, useLocation } from "react-router";
 
@@ -127,6 +128,11 @@ const AdminLayout = () => {
         key: "/admin/users",
         icon: <UsergroupAddOutlined />,
         label: "Pengguna",
+      },
+      {
+        key: "/admin/notifications",
+        icon: <BellOutlined />,
+        label: "Notifikasi",
       }
     );
   }

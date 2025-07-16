@@ -10,8 +10,15 @@ import {
   DatePicker,
   Select,
   message,
+  Dropdown,
 } from "antd";
-import { EyeOutlined, LogoutOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  LogoutOutlined,
+  ReloadOutlined,
+  WhatsAppOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
 import api from "../../lib/api";
 import dayjs from "dayjs";
 import { useCrud } from "../../hooks/useCrud";
@@ -91,6 +98,18 @@ const Visits = () => {
     }
   };
 
+  const sendNotification = async (visitId) => {
+    try {
+      await api.post("/notifications/guest-registered", { visitId });
+      message.success("Notifikasi WhatsApp berhasil dikirim ke PIC!");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      message.error(
+        error.response?.data?.message || "Gagal mengirim notifikasi WhatsApp"
+      );
+    }
+  };
+
   const columns = [
     {
       title: "Nama Tamu",
@@ -133,24 +152,51 @@ const Visits = () => {
     {
       title: "Aksi",
       key: "actions",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="text"
-            icon={<EyeOutlined />}
-            onClick={() => showVisitDetails(record.id)}
-            title="Lihat Detail"
-          />
-          {record.status === "checked_in" && (
+      width: 80,
+      render: (_, record) => {
+        const items = [
+          {
+            key: "view",
+            label: "Lihat Detail",
+            icon: <EyeOutlined />,
+            onClick: () => showVisitDetails(record.id),
+          },
+        ];
+
+        // Add WhatsApp notification option if host has phone number
+        if (record.Host?.phoneNumber) {
+          items.push({
+            key: "whatsapp",
+            label: "Kirim Notifikasi WhatsApp",
+            icon: <WhatsAppOutlined style={{ color: "#25D366" }} />,
+            onClick: () => sendNotification(record.id),
+          });
+        }
+
+        // Add checkout option if still checked in
+        if (record.status === "checked_in") {
+          items.push({
+            key: "checkout",
+            label: "Check Out",
+            icon: <LogoutOutlined />,
+            onClick: () => handleCheckOut(record.id),
+          });
+        }
+
+        return (
+          <Dropdown
+            menu={{ items }}
+            trigger={["click"]}
+            placement="bottomRight"
+          >
             <Button
               type="text"
-              icon={<LogoutOutlined />}
-              onClick={() => handleCheckOut(record.id)}
-              title="Check Out"
+              icon={<MoreOutlined />}
+              onClick={(e) => e.stopPropagation()}
             />
-          )}
-        </Space>
-      ),
+          </Dropdown>
+        );
+      },
     },
   ];
 
