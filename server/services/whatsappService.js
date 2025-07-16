@@ -1,11 +1,18 @@
 const {
   default: makeWASocket,
   DisconnectReason,
-  useSingleFileAuthState,
+  useMultiFileAuthState,
 } = require("@whiskeysockets/baileys");
+const qrCodeTerminal = require("qrcode-terminal");
 const { Boom } = require("@hapi/boom");
 
 class WhatsAppService {
+  constructor() {
+    this.enabled = true;
+    this.sock = null;
+    this.isConnected = false;
+  }
+
   /**
    * Format phone number to international format
    * @param {string} phoneNumber
@@ -68,61 +75,101 @@ Silakan sambut tamu Anda. Terima kasih! 🙏`;
   }
 
   async connectToWhatsApp() {
-    const { state, saveState } = useSingleFileAuthState("./auth_info.json");
+    try {
+      const { state, saveCreds } = await useMultiFileAuthState(
+        "./wa_auth_info"
+      );
 
-    // Create a new WhatsApp connection
-    const sock = makeWASocket({
-      version: [2, 2413, 1],
-      printQRInTerminal: true,
-      auth: state,
-      getMessage: async (key) => {
-        return {
-          conversation: "hello",
-        };
-      },
-    });
+      // Create a new WhatsApp connection
+      const sock = makeWASocket({
+        printQRInTerminal: false,
+        auth: state,
+        qrTimeoutMs: 60_000, // Set QR code timeout to 60 seconds
+        logger: require("pino")({ level: "silent" }), // Silent logging to reduce noise
+      });
 
-    // Handle connection updates
-    sock.ev.on("connection.update", (update) => {
-      const { connection, lastDisconnect } = update;
-      if (connection === "close") {
-        const shouldReconnect =
-          (lastDisconnect.error instanceof Boom)?.output?.statusCode !==
-          DisconnectReason.loggedOut;
-        if (shouldReconnect) {
-          this.connectToWhatsApp();
+      console.log("WhatsApp socket created, waiting for connection...");
+
+      // if (!sock.authState.creds.registered) {
+      //   const number = "+6285848909262";
+      //   const code = await sock.requestPairingCode(number);
+      //   console.log(code);
+      // }
+
+      // Handle connection updates
+      sock.ev.on("connection.update", (update) => {
+        const { connection, lastDisconnect, qr } = update;
+
+        if (qr) {
+          console.log("QR Code received, scan it to authenticate");
+          qrCodeTerminal.generate(qr, { small: true });
         }
-      } else if (connection === "open") {
-        console.log("Connected to WhatsApp!");
-      }
-    });
 
-    // Save session state periodically and when the connection closes
-    sock.ev.on("creds.update", saveState);
+        if (connection === "close") {
+          this.isConnected = false;
+          const shouldReconnect =
+            (lastDisconnect?.error instanceof Boom)?.output?.statusCode !==
+            DisconnectReason.loggedOut;
 
-    return sock;
+          console.log("Connection closed due to:", lastDisconnect?.error);
+
+          if (shouldReconnect) {
+            console.log("Attempting to reconnect...");
+            setTimeout(() => this.connectToWhatsApp(), 3000);
+          }
+        } else if (connection === "open") {
+          console.log("Connected to WhatsApp!");
+          this.isConnected = true;
+        } else if (connection === "connecting") {
+          console.log("Connecting to WhatsApp...");
+        }
+      });
+
+      // Save session state periodically and when the connection closes
+      sock.ev.on("creds.update", saveCreds);
+
+      // Store the socket instance
+      this.sock = sock;
+
+      return sock;
+    } catch (error) {
+      console.error("Error creating WhatsApp connection:", error);
+      throw error;
+    }
   }
 
   // Function to send a text message
   async sendTextMessage(recipient, message) {
-    const sock = await this.connectToWhatsApp();
+    if (!this.enabled) {
+      console.log("WhatsApp notifications are disabled");
+      return { success: false, message: "WhatsApp notifications are disabled" };
+    }
 
-    // Wait for the connection to be ready
-    await new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (sock.user) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 1000);
-    });
+    try {
+      if (!this.isConnected) {
+        await this.connectToWhatsApp();
+      }
 
-    // Send the message
-    await sock.sendMessage(recipient, { text: message });
-    console.log(`Message sent to ${recipient}`);
+      if (!this.isConnected || !this.sock) {
+        throw new Error("Unable to connect to WhatsApp");
+      }
 
-    // Close the connection after sending
-    await sock.end();
+      // Ensure phone number is in the correct format
+      const formattedNumber = recipient.startsWith("+")
+        ? recipient.substring(1)
+        : recipient;
+      const jid = formattedNumber.includes("@")
+        ? formattedNumber
+        : `${formattedNumber}@s.whatsapp.net`;
+
+      await this.sock.sendMessage(jid, { text: message });
+      console.log(`WhatsApp message sent to ${recipient}`);
+
+      return { success: true, message: "Message sent successfully" };
+    } catch (error) {
+      console.error("Error sending WhatsApp message:", error);
+      throw error;
+    }
   }
 
   /**
