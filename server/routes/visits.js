@@ -2,6 +2,7 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { Visit, Guest, Host, Purpose, Department } = require("../models");
 const { Op } = require("sequelize");
+const whatsappService = require("../services/whatsappService");
 const router = express.Router();
 
 // Validation middleware
@@ -125,7 +126,7 @@ router.get("/", async (req, res) => {
         {
           model: Host,
           as: "Host",
-          attributes: ["id", "name"],
+          attributes: ["id", "name", "phoneNumber"],
           include: {
             model: Department,
             as: "Department",
@@ -504,6 +505,54 @@ router.post("/", validateVisit, async (req, res) => {
         },
       ],
     });
+
+    // Send WhatsApp notification to host if available
+    if (HostId) {
+      try {
+        const hostWithDepartment = await Host.findByPk(HostId, {
+          include: [
+            {
+              model: Department,
+              as: "Department",
+              attributes: ["name"],
+            },
+          ],
+        });
+
+        if (hostWithDepartment && hostWithDepartment.phoneNumber) {
+          console.log(
+            "Sending WhatsApp notification to host:",
+            hostWithDepartment.name
+          );
+
+          const notificationSent =
+            await whatsappService.notifyHostOfGuestRegistration(
+              guestData,
+              {
+                ...completeVisit.toJSON(),
+                visitDate: visit.visitDate,
+                customPurpose,
+                notes,
+              },
+              hostWithDepartment
+            );
+
+          if (notificationSent) {
+            console.log("WhatsApp notification sent successfully to host");
+          } else {
+            console.log("Failed to send WhatsApp notification to host");
+          }
+        } else {
+          console.log("Host phone number not available, skipping notification");
+        }
+      } catch (notificationError) {
+        console.error(
+          "Error sending WhatsApp notification:",
+          notificationError
+        );
+        // Don't fail the request if notification fails
+      }
+    }
 
     res.status(201).json({
       success: true,
