@@ -14,6 +14,11 @@ const validateVisit = [
     .trim()
     .isLength({ min: 10, max: 15 })
     .withMessage("Phone number must be between 10 and 15 characters"),
+  body("guestData.idNumber")
+    .optional()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage("ID number must not exceed 20 characters"),
   body("guestData.email")
     .optional()
     .isEmail()

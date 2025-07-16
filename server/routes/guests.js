@@ -48,7 +48,7 @@ router.get("/", async (req, res) => {
     const replacements = { limit: parseInt(limit), offset: parseInt(offset) };
 
     if (search) {
-      searchCondition = `WHERE (g.name ILIKE :search OR g.email ILIKE :search OR g.company ILIKE :search)`;
+      searchCondition = `WHERE (g.name ILIKE :search OR g.email ILIKE :search OR g.company ILIKE :search OR g."idNumber" ILIKE :search)`;
       replacements.search = `%${search}%`;
     }
 

@@ -72,6 +72,12 @@ const Guests = () => {
       key: "phoneNumber",
     },
     {
+      title: "Nomor Identitas",
+      dataIndex: "idNumber",
+      key: "idNumber",
+      render: (idNumber) => idNumber || "-",
+    },
+    {
       title: "Perusahaan",
       dataIndex: "company",
       key: "company",
@@ -116,10 +122,10 @@ const Guests = () => {
           <Title level={3}>Kelola Tamu</Title>
           <Space>
             <Input.Search
-              placeholder="Cari berdasarkan nama, email, atau perusahaan"
+              placeholder="Cari berdasarkan nama, email, perusahaan, atau nomor identitas"
               allowClear
               onSearch={handleSearch}
-              style={{ width: 400 }}
+              style={{ width: 450 }}
             />
             <Button
               icon={<ReloadOutlined />}
@@ -174,6 +180,9 @@ const Guests = () => {
             </Descriptions.Item>
             <Descriptions.Item label="Nomor Telepon">
               {selectedGuest.phoneNumber}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nomor Identitas">
+              {selectedGuest.idNumber || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Perusahaan">
               {selectedGuest.company || "-"}

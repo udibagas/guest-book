@@ -150,20 +150,41 @@ const GuestForm = () => {
 
   const renderPersonalInfoStep = () => (
     <>
-      <Form.Item
-        label="Nama Lengkap"
-        name="name"
-        rules={[
-          { required: true, message: "Silakan masukkan nama lengkap Anda" },
-          { min: 2, message: "Nama minimal 2 karakter" },
-          { max: 100, message: "Nama maksimal 100 karakter" },
-        ]}
-      >
-        <Input
-          prefix={<UserOutlined />}
-          placeholder="Masukkan nama lengkap Anda"
-        />
-      </Form.Item>
+      <Row gutter={[16, 0]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Nama Lengkap"
+            name="name"
+            rules={[
+              { required: true, message: "Silakan masukkan nama lengkap Anda" },
+              { min: 2, message: "Nama minimal 2 karakter" },
+              { max: 100, message: "Nama maksimal 100 karakter" },
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="Masukkan nama lengkap Anda"
+            />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="Nomor Identitas"
+            name="idNumber"
+            rules={[
+              {
+                max: 20,
+                message: "Nomor identitas maksimal 20 karakter",
+              },
+            ]}
+          >
+            <Input
+              prefix={<IdcardOutlined />}
+              placeholder="Masukkan nomor KTP/SIM (opsional)"
+            />
+          </Form.Item>
+        </Col>
+      </Row>
 
       <Row gutter={[16, 0]}>
         <Col xs={24} sm={12}>
@@ -431,6 +452,7 @@ const GuestForm = () => {
         guestData: {
           name: allValues.name,
           phoneNumber: allValues.phoneNumber,
+          idNumber: allValues.idNumber || null,
           email: allValues.email,
           company: allValues.company || null,
           role: allValues.role,
