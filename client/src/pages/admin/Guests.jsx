@@ -9,8 +9,23 @@ import {
   Modal,
   Descriptions,
   Tag,
+  Row,
+  Col,
+  Avatar,
+  Segmented,
 } from "antd";
-import { ReloadOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+  ReloadOutlined,
+  EyeOutlined,
+  TableOutlined,
+  AppstoreOutlined,
+  UserOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  BankOutlined,
+  IdcardOutlined,
+  SettingOutlined,
+} from "@ant-design/icons";
 import { useCrud } from "../../hooks/useCrud";
 import { useState } from "react";
 import dayjs from "dayjs";
@@ -27,6 +42,7 @@ const Guests = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedGuest, setSelectedGuest] = useState(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState("table");
 
   const handleSearch = (value) => {
     setSearchText(value);
@@ -49,6 +65,156 @@ const Guests = () => {
 
   const { useFetch: useFetchCrud, refreshData } = useCrud("/guests");
   const { data, isPending } = useFetchCrud({ search: searchText });
+
+  const renderCardView = () => {
+    const guests = data?.data?.rows || [];
+
+    return (
+      <>
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          {guests.map((guest) => (
+            <Col xs={24} sm={12} md={8} lg={6} xl={6} key={guest.id}>
+              <Card
+                hoverable
+                size="small"
+                onClick={() => showDetail(guest)}
+                style={{
+                  height: "100%",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  border: "1px solid #f0f0f0",
+                }}
+                styles={{ body: { padding: "12px" } }}
+              >
+                <Card.Meta
+                  avatar={
+                    guest.idPhotoPath ? (
+                      <Avatar
+                        size={48}
+                        src={`${import.meta.env.VITE_API_URL || ""}${
+                          guest.idPhotoPath
+                        }`}
+                        style={{ border: "2px solid #f0f0f0" }}
+                      />
+                    ) : (
+                      <Avatar
+                        size={48}
+                        icon={<UserOutlined />}
+                        style={{ backgroundColor: "#f56a00" }}
+                      />
+                    )
+                  }
+                  title={guest.name}
+                  description={
+                    <div style={{ color: "#666" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <PhoneOutlined
+                          style={{
+                            marginRight: 6,
+                            color: "#1890ff",
+                          }}
+                        />
+                        <span>{guest.phoneNumber}</span>
+                      </div>
+                      {guest.email && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <MailOutlined
+                            style={{
+                              marginRight: 6,
+                              color: "#52c41a",
+                            }}
+                          />
+                          <span
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {guest.email}
+                          </span>
+                        </div>
+                      )}
+                      {guest.company && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <BankOutlined
+                            style={{
+                              marginRight: 6,
+                              color: "#722ed1",
+                            }}
+                          />
+                          <span
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {guest.company}
+                          </span>
+                        </div>
+                      )}
+                      {guest.role && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <IdcardOutlined
+                            style={{
+                              marginRight: 6,
+                              color: "#fa8c16",
+                            }}
+                          />
+                          <span
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {guest.role}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  }
+                />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+
+        {/* Card View Pagination */}
+        {guests.length === 0 && !isPending && (
+          <div style={{ textAlign: "center", padding: "50px", color: "#999" }}>
+            <UserOutlined style={{ fontSize: "48px", marginBottom: "16px" }} />
+            <div>Tidak ada data tamu yang ditemukan</div>
+          </div>
+        )}
+      </>
+    );
+  };
 
   const columns = [
     {
@@ -92,7 +258,7 @@ const Guests = () => {
       render: (totalVisits) => <Tag color="blue">{totalVisits || 0}</Tag>,
     },
     {
-      title: <ReloadOutlined onClick={refreshData} />,
+      title: <SettingOutlined />,
       key: "actions",
       width: 120,
       align: "center",
@@ -123,28 +289,63 @@ const Guests = () => {
               onSearch={handleSearch}
               style={{ width: 500 }}
             />
+            <Segmented
+              options={[
+                {
+                  label: "Tabel",
+                  value: "table",
+                  icon: <TableOutlined />,
+                },
+                {
+                  label: "Kartu",
+                  value: "card",
+                  icon: <AppstoreOutlined />,
+                },
+              ]}
+              value={viewMode}
+              onChange={setViewMode}
+            />
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={refreshData}
+              loading={isPending}
+            >
+              Perbarui
+            </Button>
           </Space>
         </div>
 
-        {/* Guests Table */}
-        <Table
-          size="middle"
-          columns={columns}
-          dataSource={data?.data?.rows || []}
-          rowKey="id"
-          loading={isPending}
-          onRow={(record) => ({
-            onClick: () => showDetail(record),
-          })}
-          pagination={{
-            ...pagination,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} dari ${total} tamu`,
-          }}
-          onChange={handleTableChange}
-        />
+        {/* Guests Display */}
+        {viewMode === "table" ? (
+          <Table
+            size="middle"
+            columns={columns}
+            dataSource={data?.data?.rows || []}
+            rowKey="id"
+            loading={isPending}
+            onRow={(record) => ({
+              onClick: () => showDetail(record),
+            })}
+            pagination={{
+              ...pagination,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} dari ${total} tamu`,
+            }}
+            onChange={handleTableChange}
+          />
+        ) : (
+          <div>
+            {isPending ? (
+              <div style={{ textAlign: "center", padding: "50px" }}>
+                <Button loading>Loading...</Button>
+              </div>
+            ) : (
+              renderCardView()
+            )}
+          </div>
+        )}
       </Card>
 
       {/* Guest Detail Modal */}
