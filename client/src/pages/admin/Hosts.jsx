@@ -22,7 +22,6 @@ import {
   DeleteOutlined,
   ReloadOutlined,
   MoreOutlined,
-  SettingOutlined,
   UploadOutlined,
   DownloadOutlined,
   InfoCircleOutlined,
@@ -41,6 +40,8 @@ const Hosts = () => {
   const queryClient = useQueryClient();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importResults, setImportResults] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [filteredHosts, setFilteredHosts] = useState([]);
 
   const {
     form,
@@ -141,6 +142,36 @@ const Hosts = () => {
     }
   }, [editingData, form]);
 
+  // Filter hosts based on search text
+  useEffect(() => {
+    if (!hosts) {
+      setFilteredHosts([]);
+      return;
+    }
+
+    if (!searchText.trim()) {
+      setFilteredHosts(hosts);
+      return;
+    }
+
+    const filtered = hosts.filter((host) => {
+      const searchLower = searchText.toLowerCase();
+      return (
+        host.name?.toLowerCase().includes(searchLower) ||
+        host.email?.toLowerCase().includes(searchLower) ||
+        host.phoneNumber?.toLowerCase().includes(searchLower) ||
+        host.Department?.name?.toLowerCase().includes(searchLower) ||
+        host.Role?.name?.toLowerCase().includes(searchLower)
+      );
+    });
+
+    setFilteredHosts(filtered);
+  }, [hosts, searchText]);
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+  };
+
   const columns = [
     {
       title: "Nama",
@@ -190,8 +221,8 @@ const Hosts = () => {
             danger: true,
             onClick: () => {
               Modal.confirm({
-                title: "Hapus Role",
-                content: "Anda yakin akan menghapus role ini?",
+                title: "Hapus PIC",
+                content: "Anda yakin akan menghapus PIC ini?",
                 okText: "Ya",
                 cancelText: "Tidak",
                 onOk: () => handleDelete(record.id),
@@ -219,6 +250,13 @@ const Hosts = () => {
         <div className="page-header">
           <Title level={3}>Kelola PIC</Title>
           <Space>
+            <Input.Search
+              placeholder="Cari berdasarkan nama, email, telepon, departemen, atau jabatan"
+              allowClear
+              style={{ width: 400 }}
+              onSearch={handleSearch}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
             <Button icon={<DownloadOutlined />} onClick={downloadTemplate}>
               Download Template
             </Button>
@@ -240,9 +278,17 @@ const Hosts = () => {
         <Table
           size="middle"
           columns={columns}
-          dataSource={hosts}
+          dataSource={filteredHosts}
           rowKey="id"
           loading={isPending}
+          pagination={{
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} dari ${total} PIC${
+                searchText ? ` (difilter dari ${hosts?.length || 0} total)` : ""
+              }`,
+          }}
         />
       </Card>
 
