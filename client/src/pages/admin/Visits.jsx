@@ -267,9 +267,10 @@ const Visits = () => {
       filteredValue: filters.status ? [filters.status] : null,
     },
     {
-      title: "Aksi",
+      title: <ReloadOutlined onClick={refreshData} />,
       key: "actions",
       width: 80,
+      align: "center",
       render: (_, record) => {
         const items = [
           {
@@ -281,7 +282,7 @@ const Visits = () => {
         ];
 
         // Add WhatsApp notification option if host has phone number
-        if (record.Host?.phoneNumber) {
+        if (record.Host?.phoneNumber && record.status === "checked_in") {
           items.push({
             key: "whatsapp",
             label: "Kirim Notifikasi WhatsApp",
@@ -333,22 +334,8 @@ const Visits = () => {
               onChange={handleDateFilter}
               placeholder={["Tanggal Mulai", "Tanggal Akhir"]}
             />
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={refreshData}
-              loading={isPending}
-            >
-              Perbarui
-            </Button>
           </div>
         </div>
-
-        {/* Filters */}
-        {/* <div style={{ marginBottom: 20, backgroundColor: "#fafcffff" }}>
-          <Space>
-            <strong>Filter:</strong>
-          </Space>
-        </div> */}
 
         {/* Visit Table */}
         <Table
@@ -381,6 +368,7 @@ const Visits = () => {
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         handleCheckOut={handleCheckOut}
+        sendNotification={sendNotification}
       />
     </>
   );

@@ -15,7 +15,6 @@ import {
   DeleteOutlined,
   ReloadOutlined,
   MoreOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import { useCrud } from "../../hooks/useCrud";
 import { useEffect } from "react";
@@ -64,7 +63,7 @@ const Roles = () => {
       render: (description) => description || "-",
     },
     {
-      title: <SettingOutlined />,
+      title: <ReloadOutlined onClick={refreshData} />,
       key: "actions",
       align: "center",
       width: 60,
@@ -119,13 +118,6 @@ const Roles = () => {
               onClick={handleAdd}
             >
               Tambah Jabatan
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={refreshData}
-              loading={isPending}
-            >
-              Perbarui
             </Button>
           </Space>
         </div>

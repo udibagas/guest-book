@@ -16,7 +16,6 @@ import {
   DeleteOutlined,
   ReloadOutlined,
   MoreOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import { useCrud } from "../../hooks/useCrud";
 
@@ -64,7 +63,7 @@ const Purposes = () => {
       render: (description) => description || "-",
     },
     {
-      title: <SettingOutlined />,
+      title: <ReloadOutlined onClick={refreshData} />,
       key: "actions",
       align: "center",
       width: 60,
@@ -119,13 +118,6 @@ const Purposes = () => {
               onClick={handleAdd}
             >
               Tambah Tujuan
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={refreshData}
-              loading={isPending}
-            >
-              Perbarui
             </Button>
           </Space>
         </div>

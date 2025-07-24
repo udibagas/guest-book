@@ -13,6 +13,7 @@ import {
   CalendarOutlined,
   FileTextOutlined,
   CameraOutlined,
+  WhatsAppOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 const { Title } = Typography;
@@ -22,6 +23,7 @@ export default function VisitDetail({
   modalVisible,
   setModalVisible,
   handleCheckOut,
+  sendNotification,
 }) {
   return (
     <Modal
@@ -43,6 +45,18 @@ export default function VisitDetail({
             }}
           >
             Check Out
+          </Button>
+        ),
+        visit?.status === "checked_in" && sendNotification && (
+          <Button
+            key="checkout"
+            type="primary"
+            icon={<WhatsAppOutlined />}
+            onClick={() => {
+              sendNotification(visit.id);
+            }}
+          >
+            Kirim Notifikasi
           </Button>
         ),
       ]}

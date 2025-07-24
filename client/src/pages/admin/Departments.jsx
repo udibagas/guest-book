@@ -15,7 +15,6 @@ import {
   EditOutlined,
   DeleteOutlined,
   ReloadOutlined,
-  SettingOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
 import { useCrud } from "../../hooks/useCrud";
@@ -64,7 +63,7 @@ const Departments = () => {
       render: (description) => description || "-",
     },
     {
-      title: <SettingOutlined />,
+      title: <ReloadOutlined onClick={refreshData} />,
       key: "actions",
       align: "center",
       width: 60,
@@ -119,13 +118,6 @@ const Departments = () => {
               onClick={handleAdd}
             >
               Tambah Departemen
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={refreshData}
-              loading={isPending}
-            >
-              Perbarui
             </Button>
           </Space>
         </div>

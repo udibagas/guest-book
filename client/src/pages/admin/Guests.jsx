@@ -10,12 +10,7 @@ import {
   Descriptions,
   Tag,
 } from "antd";
-import {
-  EditOutlined,
-  ReloadOutlined,
-  SettingOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { useCrud } from "../../hooks/useCrud";
 import { useState } from "react";
 import dayjs from "dayjs";
@@ -97,9 +92,10 @@ const Guests = () => {
       render: (totalVisits) => <Tag color="blue">{totalVisits || 0}</Tag>,
     },
     {
-      title: "",
+      title: <ReloadOutlined onClick={refreshData} />,
       key: "actions",
       width: 120,
+      align: "center",
       render: (_, record) => (
         <Space>
           <Button
@@ -127,13 +123,6 @@ const Guests = () => {
               onSearch={handleSearch}
               style={{ width: 500 }}
             />
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={refreshData}
-              loading={isPending}
-            >
-              Perbarui
-            </Button>
           </Space>
         </div>
 

@@ -171,7 +171,7 @@ const Hosts = () => {
       render: (roleName) => roleName || "-",
     },
     {
-      title: <SettingOutlined />,
+      title: <ReloadOutlined onClick={refreshData} />,
       key: "actions",
       align: "center",
       width: 60,
@@ -232,13 +232,6 @@ const Hosts = () => {
               onClick={handleAdd}
             >
               Tambah PIC
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={refreshData}
-              loading={isPending}
-            >
-              Perbarui
             </Button>
           </Space>
         </div>
