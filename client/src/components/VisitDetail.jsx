@@ -16,6 +16,14 @@ import {
   WhatsAppOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import "dayjs/locale/id"; // Import Indonesian locale
+import duration from "dayjs/plugin/duration";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
+dayjs.locale("id");
+
 const { Title } = Typography;
 
 export default function VisitDetail({
@@ -25,6 +33,34 @@ export default function VisitDetail({
   handleCheckOut,
   sendNotification,
 }) {
+  const calculateDuration = (checkInTime, checkOutTime = null) => {
+    const startTime = dayjs(checkInTime);
+    const endTime = checkOutTime ? dayjs(checkOutTime) : dayjs();
+    const diff = endTime.diff(startTime);
+
+    const duration = dayjs.duration(diff);
+    const days = Math.floor(duration.asDays());
+    const hours = duration.hours();
+    const minutes = duration.minutes();
+
+    let result = "";
+    if (days > 0) {
+      result += `${days} hari `;
+    }
+    if (hours > 0) {
+      result += `${hours} jam `;
+    }
+    if (minutes > 0) {
+      result += `${minutes} menit`;
+    }
+
+    if (!result) {
+      result = "Kurang dari 1 menit";
+    }
+
+    return result.trim();
+  };
+
   return (
     <Modal
       title="Detail Kunjungan"
@@ -78,17 +114,20 @@ export default function VisitDetail({
                   <Descriptions.Item label="Nama">
                     {visit.Guest?.name}
                   </Descriptions.Item>
+                  <Descriptions.Item label="Nomor Identitas">
+                    {visit.Guest?.idNumber || "-"}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Email">
-                    {visit.Guest?.email || "Tidak ada"}
+                    {visit.Guest?.email || "-"}
                   </Descriptions.Item>
                   <Descriptions.Item label="Nomor Telepon">
                     {visit.Guest?.phoneNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="Perusahaan">
-                    {visit.Guest?.company || "Tidak ada"}
+                    {visit.Guest?.company || "-"}
                   </Descriptions.Item>
                   <Descriptions.Item label="Jabatan">
-                    {visit.Guest?.role || "Tidak ada"}
+                    {visit.Guest?.role || "-"}
                   </Descriptions.Item>
                 </Descriptions>
               ),
@@ -112,13 +151,26 @@ export default function VisitDetail({
                     {visit.Host?.Department?.name || "Tidak ada"}
                   </Descriptions.Item>
                   <Descriptions.Item label="Waktu Masuk">
-                    {dayjs(visit.checkInTime).format("DD-MMM-YYYY HH:mm")}
+                    {dayjs(visit.checkInTime)
+                      .locale("id")
+                      .format("dddd, DD MMMM YYYY HH:mm")}
                   </Descriptions.Item>
                   {visit.checkOutTime && (
                     <Descriptions.Item label="Waktu Keluar">
-                      {dayjs(visit.checkOutTime).format("DD-MMM-YYYY HH:mm")}
+                      {dayjs(visit.checkOutTime)
+                        .locale("id")
+                        .format("dddd, DD MMMM YYYY HH:mm")}
                     </Descriptions.Item>
                   )}
+                  <Descriptions.Item label="Durasi Kunjungan">
+                    {calculateDuration(visit.checkInTime, visit.checkOutTime)}
+                    {visit.status === "checked_in" && (
+                      <span style={{ color: "#52c41a", fontStyle: "italic" }}>
+                        {" "}
+                        (masih berlangsung)
+                      </span>
+                    )}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Status">
                     <Tag
                       color={visit.status === "checked_in" ? "green" : "blue"}

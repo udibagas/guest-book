@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import api from "../../lib/api";
 import dayjs from "dayjs";
+import "dayjs/locale/id"; // Import Indonesian locale
 import { useCrud } from "../../hooks/useCrud";
 import { useMemo } from "react";
 import VisitDetail from "../../components/VisitDetail";
@@ -121,6 +122,13 @@ const Visits = () => {
 
   const columns = [
     {
+      title: "Waktu Masuk",
+      dataIndex: "checkInTime",
+      key: "checkInTime",
+      render: (time) =>
+        dayjs(time).locale("id").format("dddd, DD MMMM YYYY HH:mm"),
+    },
+    {
       title: "Nama Tamu",
       dataIndex: ["Guest", "name"],
       key: "guestName",
@@ -215,12 +223,6 @@ const Visits = () => {
         <FilterOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
       ),
       filteredValue: filters.HostId ? [filters.HostId] : null,
-    },
-    {
-      title: "Waktu Masuk",
-      dataIndex: "checkInTime",
-      key: "checkInTime",
-      render: (time) => dayjs(time).format("DD-MMM-YYYY HH:mm"),
     },
     {
       title: "Status",
