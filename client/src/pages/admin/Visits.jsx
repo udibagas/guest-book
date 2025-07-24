@@ -134,6 +134,11 @@ const Visits = () => {
       key: "guestName",
     },
     {
+      title: "Nomor Identitas",
+      dataIndex: ["Guest", "idNumber"],
+      key: "guestIdNumber",
+    },
+    {
       title: "Perusahaan",
       dataIndex: ["Guest", "company"],
       key: "guestCompany",
