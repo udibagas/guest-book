@@ -69,7 +69,7 @@ ${guestData.idNumber ? `• Nomor Identitas: ${guestData.idNumber}` : ""}
 ${visitData.Purpose?.name || visitData.customPurpose || "Tidak disebutkan"}
 
 📅 *Waktu Kunjungan:*
-${new Date(visitData.visitDate).toLocaleString("id-ID", {
+${new Date(visitData.checkInTime).toLocaleString("id-ID", {
   weekday: "long",
   year: "numeric",
   month: "long",
