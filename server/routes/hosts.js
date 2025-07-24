@@ -2,7 +2,31 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { Host, Department, Role } = require("../models");
 const { authenticateToken, requireAdmin } = require("../middleware/auth");
+const multer = require("multer");
+const xlsx = require("xlsx");
+const path = require("path");
 const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+      "text/csv",
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only Excel files (.xlsx, .xls) and CSV files are allowed"));
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
 
 // Validation middleware
 const validateHost = [
@@ -331,5 +355,220 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
     });
   }
 });
+
+// POST /api/hosts/import - Import hosts from Excel file (admin only)
+router.post(
+  "/import",
+  authenticateToken,
+  requireAdmin,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: "No file uploaded",
+        });
+      }
+
+      // Parse Excel file
+      const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+      if (jsonData.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Excel file is empty or has no valid data",
+        });
+      }
+
+      const results = {
+        total: jsonData.length,
+        imported: 0,
+        updated: 0,
+        errors: [],
+        newDepartments: [],
+        newRoles: [],
+      };
+
+      // Helper function to find or create department
+      const findOrCreateDepartment = async (departmentName) => {
+        if (!departmentName || typeof departmentName !== "string") return null;
+
+        const trimmedName = departmentName.trim();
+        if (!trimmedName) return null;
+
+        let department = await Department.findOne({
+          where: { name: trimmedName },
+        });
+
+        if (!department) {
+          department = await Department.create({
+            name: trimmedName,
+            description: `Auto-created from Excel import`,
+          });
+          results.newDepartments.push(trimmedName);
+        }
+
+        return department;
+      };
+
+      // Helper function to find or create role
+      const findOrCreateRole = async (roleName) => {
+        if (!roleName || typeof roleName !== "string") return null;
+
+        const trimmedName = roleName.trim();
+        if (!trimmedName) return null;
+
+        let role = await Role.findOne({
+          where: { name: trimmedName },
+        });
+
+        if (!role) {
+          role = await Role.create({
+            name: trimmedName,
+            description: `Auto-created from Excel import`,
+          });
+          results.newRoles.push(trimmedName);
+        }
+
+        return role;
+      };
+
+      // Process each row
+      for (let i = 0; i < jsonData.length; i++) {
+        const row = jsonData[i];
+        const rowNumber = i + 2; // Excel row number (assuming headers in row 1)
+
+        try {
+          // Map common column names (case insensitive)
+          const getName = () => {
+            return (
+              row.name ||
+              row.Name ||
+              row.nama ||
+              row.Nama ||
+              row.full_name ||
+              row.fullName
+            );
+          };
+
+          const getEmail = () => {
+            return row.email || row.Email || row.EMAIL;
+          };
+
+          const getPhoneNumber = () => {
+            return (
+              row.phoneNumber ||
+              row.phone_number ||
+              row.phone ||
+              row.Phone ||
+              row.telepon ||
+              row.Telepon ||
+              row.no_hp ||
+              row.nohp
+            );
+          };
+
+          const getDepartmentName = () => {
+            return (
+              row.department ||
+              row.Department ||
+              row.departemen ||
+              row.Departemen ||
+              row.dept ||
+              row.Dept ||
+              row.division ||
+              row.Division
+            );
+          };
+
+          const getRoleName = () => {
+            return (
+              row.role ||
+              row.Role ||
+              row.jabatan ||
+              row.Jabatan ||
+              row.position ||
+              row.Position ||
+              row.title ||
+              row.Title
+            );
+          };
+
+          const name = getName();
+          const email = getEmail();
+          const phoneNumber = getPhoneNumber();
+          const departmentName = getDepartmentName();
+          const roleName = getRoleName();
+
+          // Validate required fields
+          if (!name) {
+            results.errors.push(`Row ${rowNumber}: Name is required`);
+            continue;
+          }
+
+          if (!email) {
+            results.errors.push(`Row ${rowNumber}: Email is required`);
+            continue;
+          }
+
+          // Validate email format
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            results.errors.push(`Row ${rowNumber}: Invalid email format`);
+            continue;
+          }
+
+          // Find or create department and role
+          const department = departmentName
+            ? await findOrCreateDepartment(departmentName)
+            : null;
+          const role = roleName ? await findOrCreateRole(roleName) : null;
+
+          // Check if host already exists (by email)
+          const existingHost = await Host.findOne({
+            where: { email: email.toLowerCase().trim() },
+          });
+
+          const hostData = {
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            phoneNumber: phoneNumber ? phoneNumber.toString().trim() : null,
+            DepartmentId: department ? department.id : null,
+            RoleId: role ? role.id : null,
+          };
+
+          if (existingHost) {
+            // Update existing host
+            await existingHost.update(hostData);
+            results.updated++;
+          } else {
+            // Create new host
+            await Host.create(hostData);
+            results.imported++;
+          }
+        } catch (error) {
+          console.error(`Error processing row ${rowNumber}:`, error);
+          results.errors.push(`Row ${rowNumber}: ${error.message}`);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "Import completed",
+        results: results,
+      });
+    } catch (error) {
+      console.error("Error importing hosts:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to import hosts: " + error.message,
+      });
+    }
+  }
+);
 
 module.exports = router;
