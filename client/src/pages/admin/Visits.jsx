@@ -18,12 +18,14 @@ import {
   ReloadOutlined,
   WhatsAppOutlined,
   MoreOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import api from "../../lib/api";
 import dayjs from "dayjs";
 import { useCrud } from "../../hooks/useCrud";
 import { useMemo } from "react";
 import VisitDetail from "../../components/VisitDetail";
+import { useFetch } from "../../hooks/useFetch";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -40,11 +42,17 @@ const Visits = () => {
     search: "",
     status: "",
     dateRange: null,
+    PurposeId: null,
+    HostId: null,
   });
 
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { useFetch: useFetchCrud, refreshData } = useCrud("/visits");
+
+  // Fetch filter options
+  const { data: purposes = [] } = useFetch("/purposes");
+  const { data: hosts = [] } = useFetch("/hosts");
 
   const params = useMemo(() => {
     const params = {
@@ -56,6 +64,12 @@ const Visits = () => {
       params.startDate = filters.dateRange[0].format("YYYY-MM-DD");
       params.endDate = filters.dateRange[1].format("YYYY-MM-DD");
     }
+    // Clean up null/empty values
+    Object.keys(params).forEach((key) => {
+      if (params[key] === null || params[key] === "") {
+        delete params[key];
+      }
+    });
     return params;
   }, [pagination, filters]);
 
@@ -63,11 +77,6 @@ const Visits = () => {
 
   const handleSearch = (value) => {
     setFilters((prev) => ({ ...prev, search: value }));
-    setPagination((prev) => ({ ...prev, current: 1 }));
-  };
-
-  const handleStatusFilter = (value) => {
-    setFilters((prev) => ({ ...prev, status: value }));
     setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
@@ -126,12 +135,86 @@ const Visits = () => {
       title: "Tujuan",
       dataIndex: ["Purpose", "name"],
       key: "purposeName",
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            placeholder="Pilih tujuan"
+            value={selectedKeys[0]}
+            onChange={(value) => {
+              setSelectedKeys(value ? [value] : []);
+              setFilters((prev) => ({ ...prev, PurposeId: value || null }));
+              setPagination((prev) => ({ ...prev, current: 1 }));
+              confirm();
+            }}
+            allowClear
+            style={{ width: 200, marginBottom: 8, display: "block" }}
+            onClear={() => {
+              clearFilters();
+              setFilters((prev) => ({ ...prev, PurposeId: null }));
+              setPagination((prev) => ({ ...prev, current: 1 }));
+              confirm();
+            }}
+          >
+            {purposes.map((purpose) => (
+              <Option key={purpose.id} value={purpose.id}>
+                {purpose.name}
+              </Option>
+            ))}
+          </Select>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <FilterOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+      filteredValue: filters.PurposeId ? [filters.PurposeId] : null,
     },
     {
       title: "PIC",
       dataIndex: ["Host", "name"],
       key: "hostName",
       render: (hostName) => hostName || "-",
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            placeholder="Pilih PIC"
+            value={selectedKeys[0]}
+            onChange={(value) => {
+              setSelectedKeys(value ? [value] : []);
+              setFilters((prev) => ({ ...prev, HostId: value || null }));
+              setPagination((prev) => ({ ...prev, current: 1 }));
+              confirm();
+            }}
+            allowClear
+            style={{ width: 200, marginBottom: 8, display: "block" }}
+            onClear={() => {
+              clearFilters();
+              setFilters((prev) => ({ ...prev, HostId: null }));
+              setPagination((prev) => ({ ...prev, current: 1 }));
+              confirm();
+            }}
+          >
+            {hosts.map((host) => (
+              <Option key={host.id} value={host.id}>
+                {host.name}
+              </Option>
+            ))}
+          </Select>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <FilterOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+      filteredValue: filters.HostId ? [filters.HostId] : null,
     },
     {
       title: "Waktu Masuk",
@@ -148,6 +231,40 @@ const Visits = () => {
           {status === "checked_in" ? "Sudah Masuk" : "Sudah Keluar"}
         </Tag>
       ),
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            placeholder="Pilih status"
+            value={selectedKeys[0]}
+            onChange={(value) => {
+              setSelectedKeys(value ? [value] : []);
+              setFilters((prev) => ({ ...prev, status: value || "" }));
+              setPagination((prev) => ({ ...prev, current: 1 }));
+              confirm();
+            }}
+            allowClear
+            style={{ width: 150, marginBottom: 8, display: "block" }}
+            onClear={() => {
+              clearFilters();
+              setFilters((prev) => ({ ...prev, status: "" }));
+              setPagination((prev) => ({ ...prev, current: 1 }));
+              confirm();
+            }}
+          >
+            <Option value="checked_in">Sudah Masuk</Option>
+            <Option value="checked_out">Sudah Keluar</Option>
+          </Select>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <FilterOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+      filteredValue: filters.status ? [filters.status] : null,
     },
     {
       title: "Aksi",
@@ -205,41 +322,33 @@ const Visits = () => {
       <Card style={{ minHeight: "calc(100vh - 100px)" }}>
         <div className="page-header">
           <Title level={3}>Kelola Kunjungan</Title>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={refreshData}
-            loading={isPending}
-          >
-            Perbarui
-          </Button>
-        </div>
-
-        {/* Filters */}
-        <Card style={{ marginBottom: 20, backgroundColor: "#f0f2f5" }}>
-          <Space>
-            <strong>Filter:</strong>
+          <div style={{ display: "flex", gap: 10 }}>
             <Input.Search
-              placeholder="Cari berdasarkan nama, email, atau perusahaan"
+              placeholder="Cari berdasarkan nama tamu atau perusahaan"
               allowClear
               onSearch={handleSearch}
               style={{ width: 400 }}
             />
-            <Select
-              placeholder="Filter berdasarkan status"
-              allowClear
-              style={{ width: 220 }}
-              onChange={handleStatusFilter}
-            >
-              <Option value="checked_in">Sudah Masuk</Option>
-              <Option value="checked_out">Sudah Keluar</Option>
-            </Select>
             <RangePicker
-              style={{ width: "100%" }}
               onChange={handleDateFilter}
               placeholder={["Tanggal Mulai", "Tanggal Akhir"]}
             />
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={refreshData}
+              loading={isPending}
+            >
+              Perbarui
+            </Button>
+          </div>
+        </div>
+
+        {/* Filters */}
+        {/* <div style={{ marginBottom: 20, backgroundColor: "#fafcffff" }}>
+          <Space>
+            <strong>Filter:</strong>
           </Space>
-        </Card>
+        </div> */}
 
         {/* Visit Table */}
         <Table
@@ -254,12 +363,15 @@ const Visits = () => {
           })}
           pagination={{
             ...pagination,
+            total: data?.data?.count || 0,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} dari ${total} kunjungan`,
           }}
-          onChange={(pagination) => setPagination(pagination)}
+          onChange={(paginationInfo) => {
+            setPagination(paginationInfo);
+          }}
         />
       </Card>
 
