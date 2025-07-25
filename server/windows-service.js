@@ -32,4 +32,27 @@ if (command === "uninstall") {
   return;
 }
 
+if (command === "start") {
+  svc.start();
+  return;
+}
+
+if (command === "stop") {
+  svc.stop();
+  return;
+}
+
+if (command === "status") {
+  console.log(`Service status: ${svc.exists ? "Installed" : "Not installed"}`);
+  return;
+}
+
+if (command === "restart") {
+  svc.stop();
+  svc.on("stop", () => {
+    svc.start();
+  });
+  return;
+}
+
 svc.install();
