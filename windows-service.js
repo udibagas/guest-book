@@ -2,7 +2,7 @@ const { Service } = require("node-windows");
 const svc = new Service({
   name: "Guest Book App",
   description: "Guest Book app as a Windows service.",
-  script: "C:\\Users\\SERVER\\guest-book\\server\\app.js",
+  script: "C:\\Users\\SERVER\\guest-book\\server\\index.js",
 });
 
 svc.on("install", () => {
