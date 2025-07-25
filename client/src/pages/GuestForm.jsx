@@ -66,7 +66,7 @@ const GuestForm = () => {
   };
 
   const handleIdentityChange = async (e) => {
-    const target = e.target.name;
+    // const target = e.target.name;
     const identity = e.target.value;
 
     // Clear previous timeout
@@ -88,15 +88,9 @@ const GuestForm = () => {
             email: guest.email || "",
             company: guest.company || "",
             role: guest.role || "",
+            idNumber: guest.idNumber || "",
+            phoneNumber: guest.phoneNumber || "",
           });
-
-          if (target === "idNumber") {
-            form.setFieldValue("phoneNumber", guest.phoneNumber || "");
-          }
-
-          if (target === "phoneNumber") {
-            form.setFieldValue("idNumber", guest.idNumber || "");
-          }
 
           message.success("Data tamu ditemukan dan telah diisi otomatis");
         } catch (error) {
@@ -189,7 +183,6 @@ const GuestForm = () => {
               prefix={<IdcardOutlined />}
               placeholder="Masukkan nomor KTP/SIM (opsional)"
               onChange={handleIdentityChange}
-              onBlur={handleIdentityChange}
               name="idNumber"
             />
           </Form.Item>
@@ -217,7 +210,6 @@ const GuestForm = () => {
               prefix={<PhoneOutlined />}
               placeholder="Masukkan nomor telepon Anda"
               onChange={handleIdentityChange}
-              onBlur={handleIdentityChange}
               name="phoneNumber"
             />
           </Form.Item>
