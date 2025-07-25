@@ -679,6 +679,10 @@ const GuestForm = () => {
                   width: 1280,
                   height: 720,
                   facingMode: "environment", // Use back camera for better ID photo capture
+                  aspectRatio: 16 / 9, // Force landscape aspect ratio
+                }}
+                style={{
+                  transform: "rotate(0deg)", // Ensure landscape orientation
                 }}
               />
               <Button
