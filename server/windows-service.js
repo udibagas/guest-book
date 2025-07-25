@@ -27,32 +27,33 @@ svc.on("uninstall", () => {
 
 const command = process.argv[2];
 
-if (command === "uninstall") {
-  svc.uninstall();
-  return;
-}
+switch (command) {
+  case "uninstall":
+    svc.uninstall();
+    break;
 
-if (command === "start") {
-  svc.start();
-  return;
-}
-
-if (command === "stop") {
-  svc.stop();
-  return;
-}
-
-if (command === "status") {
-  console.log(`Service status: ${svc.exists ? "Installed" : "Not installed"}`);
-  return;
-}
-
-if (command === "restart") {
-  svc.stop();
-  svc.on("stop", () => {
+  case "start":
     svc.start();
-  });
-  return;
-}
+    break;
 
-svc.install();
+  case "stop":
+    svc.stop();
+    break;
+
+  case "status":
+    console.log(
+      `Service status: ${svc.exists ? "Installed" : "Not installed"}`
+    );
+    break;
+
+  case "restart":
+    svc.stop();
+    svc.on("stop", () => {
+      svc.start();
+    });
+    break;
+
+  default:
+    svc.install();
+    break;
+}
