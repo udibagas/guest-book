@@ -30,7 +30,7 @@ const Home = () => {
                   className="company-name"
                   style={{ marginBottom: 24, color: "#1890ff" }}
                 >
-                  PT Mitrateknik
+                  PLN
                 </Title>
                 <Paragraph className="welcome-description">
                   Terima kasih telah berkunjung. Silakan daftarkan kunjungan

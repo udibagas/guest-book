@@ -531,7 +531,7 @@ const GuestForm = () => {
         <Result
           status="success"
           title="Registrasi Berhasil!"
-          subTitle="Terima kasih telah mendaftar. Anda sekarang telah check-in ke Mitrateknik. Selamat berkunjung!"
+          subTitle="Terima kasih telah mendaftar. Anda sekarang telah check-in ke PLN. Selamat berkunjung!"
           extra={[
             <Button type="primary" key="home" onClick={() => navigate("/")}>
               Kembali ke Beranda
